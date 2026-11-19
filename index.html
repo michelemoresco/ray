@@ -86,13 +86,14 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 .t.pop{animation:pop .45s ease}
 @media (prefers-reduced-motion:reduce){.t.pop{animation:none}}
 #addb{width:100%;padding:16px;font-size:18px;border-radius:14px}
+.b{cursor:pointer}#delb{color:var(--red);border-color:var(--red);padding:12px}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4efe3"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ray">
 </head>
 <body>
 <main>
 <div class="hd"><svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke-linecap="round" stroke-width="3.2"><path d="M6 26L11.2 6.7" stroke="#4f7be8"/><path d="M6 26L17.5 9.6" stroke="#34a36b"/><path d="M6 26L22.4 14.5" stroke="#e07a2f"/><path d="M6 26L25.3 20.8" stroke="#8c6fd0"/></svg><div><h1>Ray</h1><div class="hi" id="hello"></div></div></div>
-<div class="tabs"><button data-tab="list" class="on">Lista</button><button data-tab="tl">Timeline</button></div>
+<div class="tabs"><button data-tab="list" class="on">Lista</button><button data-tab="tl">Timeline</button><button data-tab="done">Fatti ✓</button></div>
 <div class="filters" id="filters"></div>
 <div id="now"></div>
 <div id="view"></div>
@@ -101,13 +102,14 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 </main>
 <button id="fab" aria-label="Nuova attività">+</button>
 <div id="modal" hidden><div class="sheet">
-<div class="sh"><b>Nuova attività</b><button class="ic" id="mx">✕</button></div>
+<div class="sh"><b id="mt">Nuova attività</b><button class="ic" id="mx">✕</button></div>
 <input id="in" type="text" placeholder="Es. Pagare TARI entro 16/12 · Dentista figlia domani alle 17" autocomplete="off">
 <div class="prev" id="prev"></div>
 <div class="fr"><label>Data<input type="date" id="fd"></label><label>Ora<input type="time" id="ft"></label></div>
 <div class="cats" id="fc"></div>
 <div class="chips" id="chips"></div>
 <button class="pri" id="addb">Aggiungi</button>
+<button id="delb" type="button" hidden>🗑 Elimina attività</button>
 </div></div>
 <script>
 window.addEventListener('error',e=>{const s=document.getElementById('sync');if(s)s.textContent='Errore: '+e.message});
@@ -175,10 +177,15 @@ function active(t){if(t.done)return false;if(!t.due)return false;const mx=Math.m
 function item(t){
   const n=t.due?diff(t.due):null;
   const cls=n!==null&&n<0&&!t.done?'late':n!==null&&n<=2&&!t.done?'soon':'';
-  return `<div class="t c-${t.cat||'altro'} ${t.done?'done':''} ${t.id===justDone?'pop':''}"><input type="checkbox" data-act="done" data-id="${t.id}" ${t.done?'checked':''} aria-label="Fatto"><div class="b"><div class="ti">${esc(t.title)}</div><div class="m"><span class="tag">${CATS[t.cat]||CATS.altro}</span>${t.due?`<span class="${cls}">${fmtDate(t.due)}${t.time?' · '+t.time:''} · ${rel(t.due)}</span>`:'senza scadenza'}${t.rem&&t.rem.length&&t.due?' · 🔔 '+t.rem.map(r=>r?r+'g':'0').join('/'):''}</div></div>${t.due?`<button class="ic" data-act="gcal" data-id="${t.id}" title="Aggiungi a Google Calendar">📅</button>`:''}<button class="ic" data-act="del" data-id="${t.id}" title="Elimina">✕</button></div>`;
+  return `<div class="t c-${t.cat||'altro'} ${t.done?'done':''} ${t.id===justDone?'pop':''}"><input type="checkbox" data-act="done" data-id="${t.id}" ${t.done?'checked':''} aria-label="Fatto"><div class="b" data-act="edit" data-id="${t.id}"><div class="ti">${esc(t.title)}</div><div class="m"><span class="tag">${CATS[t.cat]||CATS.altro}</span>${t.due?`<span class="${cls}">${fmtDate(t.due)}${t.time?' · '+t.time:''} · ${rel(t.due)}</span>`:'senza scadenza'}${t.rem&&t.rem.length&&t.due?' · 🔔 '+t.rem.map(r=>r?r+'g':'0').join('/'):''}</div></div>${t.due&&!t.done?`<button class="ic" data-act="gcal" data-id="${t.id}" title="Aggiungi a Google Calendar">📅</button>`:''}<button class="ic" data-act="del" data-id="${t.id}" title="Elimina">✕</button></div>`;
 }
 function hello(){const n=new Date(),dn=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'][n.getDay()],o=tasks.filter(t=>!t.done&&t.due),td=o.filter(t=>t.due===today()).length,ov=o.filter(t=>t.due<today()).length;
   $('#hello').textContent=dn+' '+n.getDate()+' '+MON[n.getMonth()]+' · '+(td?td+(td===1?' cosa per oggi':' cose per oggi'):'niente in scadenza oggi')+(ov?' · '+ov+' in ritardo':'')}
+function doneView(T){
+  const dn=T.filter(t=>t.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0)||tdate(b).localeCompare(tdate(a)));
+  if(!dn.length)return '<div class="empty">Nessuna attività completata.</div>';
+  return '<div class="note" style="margin-bottom:8px">Tocca la spunta per riaprire un’attività, o toccala per modificarla.</div>'+dn.map(item).join('')+'<button data-act="clear" style="margin-top:8px">Elimina tutte le completate</button>';
+}
 function filters(){$('#filters').innerHTML=CK.map(c=>`<button class="fl c-${c}${hidden.has(c)?' off':''}" data-cat="${c}">${CATS[c]}</button>`).join('')}
 function timeline(open){
   const vc=CK.filter(c=>!hidden.has(c)),dated=open.filter(t=>t.due),by={},gh={};
@@ -210,10 +217,8 @@ function render(){
     const g={Scaduti:[],Oggi:[],'Prossimi 7 giorni':[],'Più avanti':[],'Senza data':[]};
     open.filter(t=>!active(t)).forEach(t=>{if(!t.due)g['Senza data'].push(t);else{const n=diff(t.due);(n<0?g.Scaduti:n===0?g.Oggi:n<=7?g['Prossimi 7 giorni']:g['Più avanti']).push(t)}});
     for(const k in g)if(g[k].length)h+=`<h3>${k}</h3>`+g[k].map(item).join('');
-    const dn=T.filter(t=>t.done).sort((a,b)=>tdate(b).localeCompare(tdate(a))).slice(0,15);
-    if(dn.length)h+=`<h3>Fatti</h3>`+dn.map(item).join('')+`<button data-act="clear" style="margin-top:6px">Svuota i fatti</button>`;
-    if(!T.length)h='<div class="empty">Nessuna attività. Tocca il + per aggiungerne una.</div>';
-  }else h=timeline(open);
+    if(!h)h='<div class="empty">'+(T.length?'Tutto fatto! Le attività completate sono nella scheda Fatti.':'Nessuna attività. Tocca il + per aggiungerne una.')+'</div>';
+  }else if(tab==='done'){h=doneView(T)}else h=timeline(open);
   $('#view').innerHTML=h;justDone=null;
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
 }
@@ -243,14 +248,20 @@ function icsText(){
 
 let touched={},fcat='altro';
 function renderCats(){$('#fc').innerHTML=CK.map(c=>`<button type="button" class="cc c-${c}${fcat===c?' on':''}" data-c="${c}">${fcat===c?'✓ ':''}${CATS[c]}</button>`).join('')}
-function upd(){const v=$('#in').value.trim();if(!v){$('#prev').textContent='';return}const p=parse(v),d=$('#fd').value,r=d?REM[fcat]:[];
+function upd(){if(editing){$('#prev').textContent='';return}const v=$('#in').value.trim();if(!v){$('#prev').textContent='';return}const p=parse(v),d=$('#fd').value,r=d?REM[fcat]:[];
   $('#prev').textContent='→ '+p.title+(r.length?' · 🔔 '+r.map(x=>x+'g').join('/'):'')}
-function openM(){$('#in').value='';$('#fd').value='';$('#ft').value='';touched={};fcat='altro';renderCats();$('#prev').textContent='';$('#modal').hidden=false;window.scrollTo(0,0);setTimeout(()=>$('#in').focus(),50)}
+let editing=null;
+function openM(t){editing=t||null;
+  $('#in').value=t?t.title:'';$('#fd').value=t&&t.due||'';$('#ft').value=t&&t.time||'';
+  touched=t?{d:1,t:1,c:1}:{};fcat=t?(t.cat||'altro'):'altro';renderCats();$('#prev').textContent='';
+  $('#mt').textContent=t?'Modifica attività':'Nuova attività';$('#addb').textContent=t?'Salva modifiche':'Aggiungi';$('#delb').hidden=!t;
+  $('#modal').hidden=false;if(!t)setTimeout(()=>$('#in').focus(),50)}
 function closeM(){$('#modal').hidden=true}
-function add(){const raw=$('#in').value.trim();if(!raw)return;const p=parse(raw),due=$('#fd').value||null;
-  tasks.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),title:p.title,due,time:due?($('#ft').value||null):null,cat:fcat,rem:due?REM[fcat]:[],done:false});
+function add(){const raw=$('#in').value.trim();if(!raw)return;const due=$('#fd').value||null,time=due?($('#ft').value||null):null;
+  if(editing)Object.assign(editing,{title:raw,due,time,cat:fcat,rem:due?REM[fcat]:[]});
+  else{const p=parse(raw);tasks.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),title:p.title,due,time,cat:fcat,rem:due?REM[fcat]:[],done:false})}
   closeM();save();}
-$('#fab').onclick=openM;$('#mx').onclick=closeM;$('#addb').onclick=add;
+$('#fab').onclick=()=>openM();$('#delb').onclick=()=>{if(editing&&confirm('Eliminare questa attività?')){tasks=tasks.filter(x=>x!==editing);closeM();save()}};$('#mx').onclick=closeM;$('#addb').onclick=add;
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeM()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
 $('#in').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
@@ -269,10 +280,11 @@ document.addEventListener('click',e=>{
   const tb=e.target.closest('[data-tab]');if(tb){tab=tb.dataset.tab;render();return}
   const b=e.target.closest('[data-act]');if(!b)return;
   const t=tasks.find(x=>x.id===b.dataset.id),a=b.dataset.act;
-  if(a==='done'&&t){t.done=b.checked;justDone=t.done?t.id:null;save()}
-  else if(a==='del'&&t){tasks=tasks.filter(x=>x!==t);save()}
+  if(a==='done'&&t){t.done=b.checked;t.doneAt=t.done?Date.now():0;justDone=t.done?t.id:null;save()}
+  else if(a==='del'&&t){if(confirm('Eliminare questa attività?')){tasks=tasks.filter(x=>x!==t);save()}}
+  else if(a==='edit'&&t){openM(t)}
   else if(a==='gcal'&&t){window.open(gcalUrl(t),'_blank','noopener')}
-  else if(a==='clear'){tasks=tasks.filter(x=>!x.done);save()}
+  else if(a==='clear'){if(confirm('Eliminare definitivamente le attività completate?')){tasks=tasks.filter(x=>!x.done||hidden.has(x.cat));save()}}
 });
 // Scadenze ricorrenti suggerite (da verificare)
 [['IMU saldo 16/12','#scadenze'],['Acconto imposte 30/11','#scadenze'],['IMU acconto 16/06','#scadenze'],['730 / dichiarazione redditi 30/09','#scadenze'],['TARI rata','#scadenze'],['Bollo auto','#scadenze'],['RCA assicurazione auto','#scadenze']].forEach(([l,c])=>{
