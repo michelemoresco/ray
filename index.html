@@ -162,6 +162,11 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 .wa{display:flex;gap:2px;margin-top:6px;opacity:.5}
 .wa button{background:none;border:none;color:#f4f3ee;font:inherit;font-size:10px;letter-spacing:.12em;padding:4px 7px 4px 0;text-transform:uppercase}
 .wp .sw{margin:6px 0}.wp .sw i{width:18px;height:18px}.wp .sw i.on{border-color:#fff}
+.wi.rg{z-index:6;opacity:.85}.wi .ck{touch-action:none;padding-right:2px;user-select:none;-webkit-user-select:none}
+@font-face{font-family:"RayHand";src:url(kalam.woff2) format("woff2");font-weight:400;font-style:normal;font-display:swap}
+.wi{font-family:"RayHand","Kalam","Bradley Hand","Segoe Print",cursive;font-weight:400;text-transform:none;letter-spacing:.02em;font-size:15px;line-height:1.3;margin:9px 0;text-shadow:0 0 1px rgba(255,255,255,.45)}
+.wi small{font-size:11px;letter-spacing:.02em}
+.wi.dn2 .tx{text-decoration-thickness:1.5px}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4efe3"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ray">
 </head>
@@ -276,7 +281,7 @@ function ul(color,id){const a=hh(id)%5-2;return `<svg class="ul" viewBox="0 0 20
 function boardView(){
   if(!BD.projects.length)return '<div class="bw"><div class="bs"><div class="bde">La lavagna è vuota.<br>Tocca + e scegli “Idea” per iniziare il primo progetto.</div></div><div class="tray"></div></div>';
   autoPlace();
-  const tools=`<div class="wk"><button data-act="linkmode" class="${linkMode?'on':''}">🔗 Collega</button><span class="note">${linkMode?(linkSrc?'Ora tocca l’elemento di arrivo':'Tocca l’elemento di partenza'):'Trascina i titoli per spostare · tocca una freccia per eliminarla'}</span></div>`;
+  const tools=`<div class="wk"><button data-act="linkmode" class="${linkMode?'on':''}">🔗 Collega</button><span class="note">${linkMode?(linkSrc?'Ora tocca l’elemento di arrivo':'Tocca l’elemento di partenza'):'Trascina titoli e pallini ○ per spostarli · tocca una freccia per eliminarla'}</span></div>`;
   const ps=BD.projects.map(p=>{
     const its=BD.ideas.filter(i=>i.pid===p.id),sw=pcol===p.id?`<div class="sw">${CHALK.map(c=>`<i style="--c:${c}" data-pc="${c}" data-pid="${p.id}" class="${c===p.color?'on':''}"></i>`).join('')}</div>`:'';
     return `<div class="wp" data-pid="${p.id}" style="--ch:${p.color};left:${p.x}px;top:${p.y}px;transform:rotate(${rot(p.id,1.4).toFixed(2)}deg)"><div class="wt"><span class="dh${linkSrc==='p:'+p.id?' sel':''}" data-node="p:${p.id}">${esc(p.name)}</span></div>${ul(p.color,p.id)}${sw}<ul>${its.map(i=>`<li class="wi${i.done?' dn2':''}" style="margin-left:${hh(i.id)%6}px;transform:rotate(${rot(i.id,.9).toFixed(2)}deg)"><span class="ck" data-act="idone" data-id="${i.id}">${i.done?'✓':'○'}</span><span class="tx${linkSrc==='i:'+i.id?' sel':''}" data-node="i:${i.id}" data-act="iedit" data-id="${i.id}">${esc(i.text)}${i.due?` <small>· ${fmtDate(i.due)}</small>`:''}</span></li>`).join('')}</ul><div class="wa"><button data-act="padd" data-id="${p.id}">+ add</button><button data-act="pcol" data-id="${p.id}" title="Colore">🎨</button><button data-act="pren" data-id="${p.id}" title="Rinomina">✎</button><button data-act="pdel" data-id="${p.id}" title="Elimina">✕</button></div></div>`}).join('');
@@ -286,9 +291,25 @@ function trect(el){try{const r=document.createRange();r.selectNodeContents(el);c
 function nodeRect(el,cr){const a=trect(el);let l=a.left,t=a.top,r=a.right,b=a.bottom;
   if(el.classList.contains('tx')&&el.previousElementSibling){const c=el.previousElementSibling.getBoundingClientRect();l=Math.min(l,c.left);t=Math.min(t,c.top);r=Math.max(r,c.right);b=Math.max(b,c.bottom)}
   return{x:l-cr.left,y:t-cr.top,w:r-l,h:b-t}}
-function anchor(r,t,idea){const cx=r.x+r.w/2,cy=r.y+r.h/2,dx=t.x-cx,dy=t.y-cy,g=7;
-  if(idea||Math.abs(dx)*r.h>Math.abs(dy)*r.w)return{x:dx>=0?r.x+r.w+g:r.x-g,y:cy};
-  return{x:cx,y:dy>=0?r.y+r.h+g:r.y-g}}
+function bez(p0,c1,c2,p1,t){const u=1-t;return{x:u*u*u*p0.x+3*u*u*t*c1.x+3*u*t*t*c2.x+t*t*t*p1.x,y:u*u*u*p0.y+3*u*u*t*c1.y+3*u*t*t*c2.y+t*t*t*p1.y}}
+function sidePt(r,s,g){return s==='l'?{x:r.x-g,y:r.y+r.h/2,ox:-1,oy:0}:s==='r'?{x:r.x+r.w+g,y:r.y+r.h/2,ox:1,oy:0}:s==='t'?{x:r.x+r.w/2,y:r.y-g,ox:0,oy:-1}:{x:r.x+r.w/2,y:r.y+r.h+g,ox:0,oy:1}}
+function route(ra,rb,ia,ib,others){
+  const ca={x:ra.x+ra.w/2,y:ra.y+ra.h/2},cb={x:rb.x+rb.w/2,y:rb.y+rb.h/2},dx=cb.x-ca.x,dy=cb.y-ca.y,dist=Math.hypot(dx,dy)||1,ux=dx/dist,uy=dy/dist,nx=-uy,ny=ux;
+  const order=(r,idea,tx,ty)=>(idea?['l','r']:['l','r','t','b']).map(s=>sidePt(r,s,7)).sort((a,b)=>(b.ox*tx+b.oy*ty)-(a.ox*tx+a.oy*ty));
+  const A=order(ra,ia,ux,uy),B=order(rb,ib,-ux,-uy),ob=others.map(o=>[o.x-8,o.y-8,o.x+o.w+8,o.y+o.h+8]);
+  let best=null,bs=1e9;
+  for(let ai=0;ai<A.length;ai++)for(let bi=0;bi<B.length;bi++){
+    const a=A[ai],b=B[bi];
+    for(const m of [.5,.9,1.5,2.4])for(const sv of [0,.35,-.35,.7,-.7]){
+      const k=Math.max(40,Math.min(220,dist*.4))*m,off=sv*dist*.5;
+      const c1={x:a.x+a.ox*k+nx*off,y:a.y+a.oy*k+ny*off},c2={x:b.x+b.ox*k+nx*off,y:b.y+b.oy*k+ny*off};
+      let col=0;
+      for(let t=.04;t<.97;t+=.03){const q=bez(a,c1,c2,b,t);if(q.x<4||q.y<4){col+=2;continue}
+        for(const o of ob)if(q.x>o[0]&&q.x<o[2]&&q.y>o[1]&&q.y<o[3]){col++;break}}
+      const pen=(ai+bi)*.15+m*.08+Math.abs(sv)*.25,sc=col*10+pen;
+      if(sc<bs){bs=sc;best={p0:a,p1:b,c1,c2}}
+      if(col===0&&pen<.45)return best}}
+  return best}
 function drawArrows(){
   const cv=$('.cv'),svg=$('#ar');if(!cv||!svg)return;
   const cr=cv.getBoundingClientRect(),obs=[];
@@ -296,22 +317,12 @@ function drawArrows(){
   let out='';
   BD.links.forEach(l=>{
     const oa=obs.find(o=>o.k===l.a),ob=obs.find(o=>o.k===l.b);if(!oa||!ob)return;
-    const ra=oa.r,rb=ob.r,ca={x:ra.x+ra.w/2,y:ra.y+ra.h/2},cb={x:rb.x+rb.w/2,y:rb.y+rb.h/2};
-    const p0=anchor(ra,cb,l.a[0]==='i'),p1=anchor(rb,ca,l.b[0]==='i');
-    const others=obs.filter(o=>o.k!==l.a&&o.k!==l.b).map(o=>o.r);
-    const dx=p1.x-p0.x,dy=p1.y-p0.y,dist=Math.hypot(dx,dy)||1,nx=-dy/dist,ny=dx/dist,mx=(p0.x+p1.x)/2,my=(p0.y+p1.y)/2;
-    let best=null,bs=1e9;
-    for(const f of [.2,-.2,.35,-.35,.55,-.55,.8,-.8,1.1,-1.1]){
-      const bl=Math.max(-500,Math.min(500,f*dist)),c={x:mx+nx*bl,y:my+ny*bl};let sc=0;
-      for(let t=.06;t<.95;t+=.04){const u=1-t,x=u*u*p0.x+2*u*t*c.x+t*t*p1.x,y=u*u*p0.y+2*u*t*c.y+t*t*p1.y;
-        if(x<4||y<4)sc+=3;
-        for(const o of others)if(x>o.x-5&&x<o.x+o.w+5&&y>o.y-5&&y<o.y+o.h+5){sc++;break}}
-      sc+=Math.abs(f)*.1;
-      if(sc<bs){bs=sc;best=c}
-      if(sc<.6)break}
-    const c=best,tx=p1.x-c.x,ty=p1.y-c.y,tl=Math.hypot(tx,ty)||1,ux=tx/tl,uy=ty/tl,hd=(a)=>{const ca_=Math.cos(a),sa=Math.sin(a);return `M${p1.x.toFixed(1)} ${p1.y.toFixed(1)}l${(-(ux*ca_-uy*sa)*11).toFixed(1)} ${(-(ux*sa+uy*ca_)*11).toFixed(1)}`};
-    const col=(document.querySelector('.wp[data-pid="'+(l.a[0]==='p'?l.a.slice(2):(BD.ideas.find(i=>i.id===l.a.slice(2))||{}).pid)+'"]')||cv).style.getPropertyValue('--ch')||'#f4f3ee';
-    const d=`M${p0.x.toFixed(1)} ${p0.y.toFixed(1)}Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`;
+    const R=route(oa.r,ob.r,l.a[0]==='i',l.b[0]==='i',obs.filter(o=>o.k!==l.a&&o.k!==l.b).map(o=>o.r));if(!R)return;
+    const {p0,p1,c1,c2}=R,tx=p1.x-c2.x,ty=p1.y-c2.y,tl=Math.hypot(tx,ty)||1,ux=tx/tl,uy=ty/tl,f=n=>n.toFixed(1);
+    const hd=a=>{const ca=Math.cos(a),sa=Math.sin(a);return `M${f(p1.x)} ${f(p1.y)}l${f(-(ux*ca-uy*sa)*11)} ${f(-(ux*sa+uy*ca)*11)}`};
+    const pid=l.a[0]==='p'?l.a.slice(2):(BD.ideas.find(i=>i.id===l.a.slice(2))||{}).pid;
+    const col=(document.querySelector('.wp[data-pid="'+pid+'"]')||cv).style.getPropertyValue('--ch')||'#f4f3ee';
+    const d=`M${f(p0.x)} ${f(p0.y)}C${f(c1.x)} ${f(c1.y)} ${f(c2.x)} ${f(c2.y)} ${f(p1.x)} ${f(p1.y)}`;
     out+=`<g class="ac" stroke="${col}"><path d="${d}"/><path d="${hd(.5)}${hd(-.5)}"/></g><path class="hit" data-link="${l.id}" d="${d}"/>`});
   svg.innerHTML=out;
 }
@@ -329,6 +340,21 @@ document.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-d
   if(!drag.raf)drag.raf=requestAnimationFrame(()=>{if(drag){drag.raf=0;drawArrows()}})});
 const endDrag=()=>{if(drag){const m=drag.moved;drag=null;if(m)saveB()}};
 document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
+let rdrag=null,rsup=false;
+document.addEventListener('pointerdown',e=>{const c=e.target.closest('.ck');if(!c||linkMode||drag)return;const li=c.closest('.wi');
+  rdrag={id:c.dataset.id,li,sy:e.clientY,moved:false,rot:li.style.transform,raf:0,dy:0};try{c.setPointerCapture(e.pointerId)}catch(x){}});
+document.addEventListener('pointermove',e=>{if(!rdrag)return;const dy=e.clientY-rdrag.sy;if(!rdrag.moved&&Math.abs(dy)<6)return;
+  if(!rdrag.moved){rdrag.moved=true;rdrag.li.classList.add('rg')}
+  rdrag.dy=dy;rdrag.li.style.transform='translateY('+dy+'px) '+rdrag.rot;
+  if(!rdrag.raf)rdrag.raf=requestAnimationFrame(()=>{if(rdrag){rdrag.raf=0;drawArrows()}})});
+const endR=()=>{if(!rdrag)return;const r=rdrag;rdrag=null;if(!r.moved)return;
+  rsup=true;setTimeout(()=>{rsup=false},60);
+  const idea=BD.ideas.find(x=>x.id===r.id);if(!idea){render();return}
+  const lr=r.li.getBoundingClientRect(),cy=lr.top+lr.height/2,sibs=[...r.li.parentElement.children].filter(x=>x!==r.li);
+  const idx=sibs.filter(x=>{const b=x.getBoundingClientRect();return b.top+b.height/2<cy}).length;
+  const grp=BD.ideas.filter(x=>x.pid===idea.pid&&x!==idea);grp.splice(idx,0,idea);
+  BD.ideas=BD.ideas.filter(x=>x.pid!==idea.pid).concat(grp);saveB()};
+document.addEventListener('pointerup',endR);document.addEventListener('pointercancel',endR);
 (()=>{let d=null;document.addEventListener('mousedown',e=>{const el=e.target.closest('.bs');if(!el||e.target.closest('.wp,.hit'))return;d={x:e.clientX,y:e.clientY,l:el.scrollLeft,t:el.scrollTop,el}});
 window.addEventListener('mousemove',e=>{if(d){d.el.scrollLeft=d.l-(e.clientX-d.x);d.el.scrollTop=d.t-(e.clientY-d.y)}});window.addEventListener('mouseup',()=>{d=null})})();
 function doneView(T){
@@ -472,13 +498,13 @@ document.addEventListener('click',e=>{
 document.addEventListener('click',e=>{
   const tb=e.target.closest('[data-tab]');if(tb){tab=(tb.dataset.tab==='done'&&tab==='done')?'list':tb.dataset.tab;render();return}
   const pc=e.target.closest('[data-pc]');if(pc){const p=BD.projects.find(x=>x.id===pc.dataset.pid);if(p){p.color=pc.dataset.pc;pcol=null;saveB()}return}
-  const nd=e.target.closest('[data-node]');
+  const wi=linkMode?e.target.closest('.wi'):null,nd=e.target.closest('[data-node]')||(wi?wi.querySelector('[data-node]'):null);
   if(linkMode&&nd){const k=nd.dataset.node;if(!linkSrc){linkSrc=k;render();return}if(linkSrc===k){linkSrc=null;render();return}
     if(!BD.links.some(l=>(l.a===linkSrc&&l.b===k)||(l.a===k&&l.b===linkSrc)))BD.links.push({id:nid(),a:linkSrc,b:k});linkMode=false;linkSrc=null;saveB();return}
   const lk=e.target.closest('[data-link]');if(lk){if(confirm('Eliminare questa freccia?')){BD.links=BD.links.filter(l=>l.id!==lk.dataset.link);saveB()}return}
   const b=e.target.closest('[data-act]');if(!b)return;
   const a0=b.dataset.act,id0=b.dataset.id,ib=BD.ideas.find(x=>x.id===id0),pb=BD.projects.find(x=>x.id===id0);
-  if(a0==='idone'){if(ib){ib.done=b.tagName==='INPUT'?b.checked:!ib.done;saveB()}return}
+  if(a0==='idone'){if(rsup)return;if(ib){ib.done=b.tagName==='INPUT'?b.checked:!ib.done;saveB()}return}
   if(a0==='iedit'){if(ib)openM(ib);return}
   if(a0==='linkmode'){linkMode=!linkMode;linkSrc=null;render();return}
   if(a0==='pcol'){pcol=pcol===id0?null:id0;render();return}
