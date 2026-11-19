@@ -92,18 +92,21 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 .filters{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;margin:0 0 16px;padding:4px 2px 8px;position:relative;z-index:1}
 .fl{flex:none;white-space:nowrap;line-height:1.3;padding:7px 13px;font-size:14px;border-radius:99px;border:1.5px solid var(--cl);background:color-mix(in srgb,var(--cl) 22%,var(--card))}
 .fl.off{background:var(--card);border:1.5px dashed var(--bd)}
+.fl.dn{font-size:12px;padding:3px 10px;margin-left:2px;border:1px solid var(--bd);background:transparent;color:var(--mut)}
+.fl.dn.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.foot{margin:48px 0 8px}#ics{font-size:12px;padding:4px 10px;color:var(--mut);border-style:dashed;background:transparent}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4efe3"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ray">
 </head>
 <body>
 <main>
 <div class="hd"><svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke-linecap="round" stroke-width="3.2"><path d="M6 26L11.2 6.7" stroke="#4f7be8"/><path d="M6 26L17.5 9.6" stroke="#34a36b"/><path d="M6 26L22.4 14.5" stroke="#e07a2f"/><path d="M6 26L25.3 20.8" stroke="#8c6fd0"/></svg><div><h1>Ray</h1><div class="hi" id="hello"></div></div></div>
-<div class="tabs"><button data-tab="list" class="on">Lista</button><button data-tab="tl">Timeline</button><button data-tab="done">Fatti ✓</button></div>
+<div class="tabs"><button data-tab="list" class="on">List</button><button data-tab="tl">Timeline</button></div>
 <div class="filters" id="filters"></div>
 <div id="now"></div>
 <div id="view"></div>
-<div class="foot"><button id="ics">⬇ Esporta tutto in .ics</button><span class="note" id="sync"></span></div>
-<div class="note">Usa #lavoro, #famiglia o #scadenze per forzare la categoria. Le scadenze fiscali suggerite vanno sempre verificate sul tuo comune/ente.</div>
+<div class="note">Usa #university, #family, #deadlines o #others per forzare la categoria. Le scadenze fiscali suggerite vanno sempre verificate sul tuo comune/ente.</div>
+<div class="foot"><button id="ics">⬇ Esporta .ics</button><span class="note" id="sync"></span></div>
 </main>
 <button id="fab" aria-label="Nuova attività">+</button>
 <div id="modal" hidden><div class="sheet">
@@ -129,7 +132,8 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const MON=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
 const WD=['domenica','lunedi','martedi','mercoledi','giovedi','venerdi','sabato'];
 const WDS=['dom','lun','mar','mer','gio','ven','sab'];
-const CATS={lavoro:'💼 Lavoro',famiglia:'👨‍👩‍👧 Famiglia',scadenze:'🧾 Scadenze',altro:'📌 Altro'};
+const CATS={lavoro:'🎓 University',famiglia:'👨‍👩‍👧 Family',scadenze:'🧾 Deadlines',altro:'📌 Others'};
+const ALIAS={lavoro:'lavoro',work:'lavoro',university:'lavoro',famiglia:'famiglia',family:'famiglia',scadenze:'scadenze',deadlines:'scadenze',deadline:'scadenze',altro:'altro',others:'altro',other:'altro'};
 const REM={scadenze:[7,1,0],lavoro:[1],famiglia:[1],altro:[1]};
 const RX_SC=/\b(tari|tasi|imu|tasse?|irpef|iva|bollo|f24|730|unico|isee|rca|assicurazione|canone|mav|pagopa|rinnovo|scadenza|inps|inail|multa|revisione|commercialista|acconto|saldo)\b/i;
 const RX_FA=/\b(figli[ae]|figlie|spesa|pediatra|scuola|dentista|cena|compleanno|nonn[oi]|saggio|festa|palestra|sport|catechismo|colloqui|genitori)\b/i;
@@ -138,7 +142,7 @@ const PRE='(?:\\b(?:entro(?:\\s+il)?|per(?:\\s+il)?|il)\\s+)?';
 function nextYearless(d,m){let y=new Date().getFullYear();let s=y+'-'+pad(m)+'-'+pad(d);if(s<today())s=(y+1)+'-'+pad(m)+'-'+pad(d);return s}
 function parse(raw){
   let t=' '+raw+' ',due=null,time=null,cat=null;
-  t=t.replace(/#(lavoro|famiglia|scadenze|altro)(?=[\s,.;]|$)/i,(m,c)=>{cat=c.toLowerCase();return ' '});
+  t=t.replace(/#(lavoro|famiglia|scadenze|altro|work|university|family|deadlines|deadline|others|other)(?=[\s,.;]|$)/i,(m,c)=>{cat=ALIAS[c.toLowerCase()];return ' '});
   t=t.replace(/\b(?:alle|ore|h)\s*(\d{1,2})(?:[:.](\d{2}))?(?=[\s,.;]|$)|\b(\d{1,2}):(\d{2})\b/i,(m,a,b,c,d)=>{const h=+(a??c),mi=+(b??d??0);if(h<24&&mi<60){time=pad(h)+':'+pad(mi);return ' '}return m});
   const now=today();
   const rules=[
@@ -191,7 +195,7 @@ function doneView(T){
   if(!dn.length)return '<div class="empty">Nessuna attività completata.</div>';
   return '<div class="note" style="margin-bottom:8px">Tocca la spunta per riaprire un’attività, o toccala per modificarla.</div>'+dn.map(item).join('')+'<button data-act="clear" style="margin-top:8px">Elimina tutte le completate</button>';
 }
-function filters(){$('#filters').innerHTML=CK.map(c=>`<button class="fl c-${c}${hidden.has(c)?' off':''}" data-cat="${c}">${CATS[c]}</button>`).join('')}
+function filters(){$('#filters').innerHTML=CK.map(c=>`<button class="fl c-${c}${hidden.has(c)?' off':''}" data-cat="${c}">${CATS[c]}</button>`).join('')+`<button class="fl dn${tab==='done'?' on':''}" data-tab="done">✓ Done</button>`}
 function timeline(open){
   const vc=CK.filter(c=>!hidden.has(c)),dated=open.filter(t=>t.due),by={},gh={};
   dated.forEach(t=>{(by[t.due]=by[t.due]||[]).push(t);(t.rem||[]).filter(r=>r>0).forEach(r=>{const d=addDays(t.due,-r);if(d>=today())(gh[d]=gh[d]||[]).push([t,r])})});
@@ -222,7 +226,7 @@ function render(){
     const g={Scaduti:[],Oggi:[],'Prossimi 7 giorni':[],'Più avanti':[],'Senza data':[]};
     open.filter(t=>!active(t)).forEach(t=>{if(!t.due)g['Senza data'].push(t);else{const n=diff(t.due);(n<0?g.Scaduti:n===0?g.Oggi:n<=7?g['Prossimi 7 giorni']:g['Più avanti']).push(t)}});
     for(const k in g)if(g[k].length)h+=`<h3>${k}</h3>`+g[k].map(item).join('');
-    if(!h)h='<div class="empty">'+(T.length?'Tutto fatto! Le attività completate sono nella scheda Fatti.':'Nessuna attività. Tocca il + per aggiungerne una.')+'</div>';
+    if(!h)h='<div class="empty">'+(T.length?'Tutto fatto! Trovi le completate con ✓ Done, sotto i filtri.':'Nessuna attività. Tocca il + per aggiungerne una.')+'</div>';
   }else if(tab==='done'){h=doneView(T)}else h=timeline(open);
   $('#view').innerHTML=h;justDone=null;
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
@@ -282,7 +286,7 @@ document.addEventListener('click',e=>{
   const f=e.target.closest('[data-cat]');if(f){const k=f.dataset.cat;hidden.has(k)?hidden.delete(k):hidden.add(k);try{localStorage.setItem('au_hidden',JSON.stringify([...hidden]))}catch(x){}render()}
 });
 document.addEventListener('click',e=>{
-  const tb=e.target.closest('[data-tab]');if(tb){tab=tb.dataset.tab;render();return}
+  const tb=e.target.closest('[data-tab]');if(tb){tab=(tb.dataset.tab==='done'&&tab==='done')?'list':tb.dataset.tab;render();return}
   const b=e.target.closest('[data-act]');if(!b)return;
   const t=tasks.find(x=>x.id===b.dataset.id),a=b.dataset.act;
   if(a==='done'&&t){t.done=b.checked;t.doneAt=t.done?Date.now():0;justDone=t.done?t.id:null;save()}
@@ -294,7 +298,7 @@ document.addEventListener('click',e=>{
 // Scadenze ricorrenti suggerite (da verificare)
 [['IMU saldo 16/12','#scadenze'],['Acconto imposte 30/11','#scadenze'],['IMU acconto 16/06','#scadenze'],['730 / dichiarazione redditi 30/09','#scadenze'],['TARI rata','#scadenze'],['Bollo auto','#scadenze'],['RCA assicurazione auto','#scadenze']].forEach(([l,c])=>{
   const b=document.createElement('button');b.className='chip';b.textContent='+ '+l;
-  b.onclick=()=>{const i=$('#in');i.value=l+' '+c;i.focus();i.dispatchEvent(new Event('input'))};$('#chips').appendChild(b);
+  b.onclick=()=>{const i=$('#in');i.value=l+' #deadlines';i.focus();i.dispatchEvent(new Event('input'))};$('#chips').appendChild(b);
 });
 $('#ics').onclick=async()=>{
   const dl=window.claude?await claude.use('downloads').catch(()=>null):null;
