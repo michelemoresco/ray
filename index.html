@@ -85,6 +85,7 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.04);background:color-mix(in srgb,var(--grn) 25%,var(--card))}100%{transform:scale(1)}}
 .t.pop{animation:pop .45s ease}
 @media (prefers-reduced-motion:reduce){.t.pop{animation:none}}
+#addb{width:100%;padding:16px;font-size:18px;border-radius:14px}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4efe3"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ray">
 </head>
@@ -109,6 +110,7 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 <button class="pri" id="addb">Aggiungi</button>
 </div></div>
 <script>
+window.addEventListener('error',e=>{const s=document.getElementById('sync');if(s)s.textContent='Errore: '+e.message});
 const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
 const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
@@ -159,10 +161,13 @@ let justDone=null;const CK=Object.keys(CATS);let hidden=new Set();try{hidden=new
 let tasks=[],tab='list',ref=null,uid=null;
 const LS='agenda_unica_v1';
 try{tasks=JSON.parse(localStorage.getItem(LS)||'[]')}catch(e){tasks=[]}
+let stamp=0;try{stamp=+(localStorage.getItem('au_upd')||0)}catch(e){}
 function save(){
-  try{localStorage.setItem(LS,JSON.stringify(tasks))}catch(e){}
-  if(ref){ref.set({tasks,updated:Date.now()}).catch(()=>{$('#sync').textContent='⚠ Sync non riuscita (dati salvati solo su questo dispositivo)'})}
+  stamp=Date.now();
+  try{localStorage.setItem(LS,JSON.stringify(tasks));localStorage.setItem('au_upd',stamp)}catch(e){}
   render();
+  const bad=()=>{$('#sync').textContent='⚠ Sync non riuscita (dati solo su questo dispositivo)'};
+  if(ref){try{ref.set({tasks,updated:stamp}).catch(bad)}catch(e){bad()}}
 }
 function tdate(t){return t.due?t.due+(t.time?' '+t.time:''):'9999'}
 function active(t){if(t.done)return false;if(!t.due)return false;const mx=Math.max(0,...(t.rem||[0]));return diff(t.due)<=mx}
@@ -240,7 +245,7 @@ let touched={},fcat='altro';
 function renderCats(){$('#fc').innerHTML=CK.map(c=>`<button type="button" class="cc c-${c}${fcat===c?' on':''}" data-c="${c}">${fcat===c?'✓ ':''}${CATS[c]}</button>`).join('')}
 function upd(){const v=$('#in').value.trim();if(!v){$('#prev').textContent='';return}const p=parse(v),d=$('#fd').value,r=d?REM[fcat]:[];
   $('#prev').textContent='→ '+p.title+(r.length?' · 🔔 '+r.map(x=>x+'g').join('/'):'')}
-function openM(){$('#in').value='';$('#fd').value='';$('#ft').value='';touched={};fcat='altro';renderCats();$('#prev').textContent='';$('#modal').hidden=false;setTimeout(()=>$('#in').focus(),50)}
+function openM(){$('#in').value='';$('#fd').value='';$('#ft').value='';touched={};fcat='altro';renderCats();$('#prev').textContent='';$('#modal').hidden=false;window.scrollTo(0,0);setTimeout(()=>$('#in').focus(),50)}
 function closeM(){$('#modal').hidden=true}
 function add(){const raw=$('#in').value.trim();if(!raw)return;const p=parse(raw),due=$('#fd').value||null;
   tasks.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),title:p.title,due,time:due?($('#ft').value||null):null,cat:fcat,rem:due?REM[fcat]:[],done:false});
@@ -290,8 +295,10 @@ render();
     ref=db.collection('data/users/'+uid).doc('tasks');
     let first=true;
     ref.onSnapshot(s=>{
-      if(first){first=false;if(s.exists&&Array.isArray(s.data().tasks)){tasks=s.data().tasks;try{localStorage.setItem(LS,JSON.stringify(tasks))}catch(e){}render()}else if(tasks.length){ref.set({tasks,updated:Date.now()}).catch(()=>{})}$('#sync').textContent='☁ Sincronizzato';return}
-      if(s.exists&&!s.metadata.hasPendingWrites&&Array.isArray(s.data().tasks)){tasks=s.data().tasks;render()}
+      const d=s.exists?s.data():null,ok=d&&Array.isArray(d.tasks);
+      if(ok&&(d.updated||0)>stamp){tasks=d.tasks;stamp=d.updated||0;try{localStorage.setItem(LS,JSON.stringify(tasks));localStorage.setItem('au_upd',stamp)}catch(e){}render()}
+      else if(first&&tasks.length&&(!ok||(d.updated||0)<stamp)){try{ref.set({tasks,updated:stamp||Date.now()}).catch(()=>{})}catch(e){}}
+      first=false;$('#sync').textContent='☁ Sincronizzato';
     },()=>{$('#sync').textContent='Dati salvati solo su questo dispositivo'});
   }catch(e){$('#sync').textContent='Dati salvati solo su questo dispositivo'}
 })();
