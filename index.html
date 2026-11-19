@@ -95,13 +95,51 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 .fl.dn{font-size:12px;padding:3px 10px;margin-left:2px;border:1px solid var(--bd);background:transparent;color:var(--mut)}
 .fl.dn.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
 .foot{margin:48px 0 8px}#ics{font-size:12px;padding:4px 10px;color:var(--mut);border-style:dashed;background:transparent}
+.filters[hidden]{display:none}.c-idea{--cl:#d9c34a}
+.seg{display:flex;gap:6px}.seg button{flex:1;border-radius:99px}.seg button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+#seg[hidden],#todoOnly[hidden],#ideaOnly[hidden]{display:none}#ideaOnly{display:flex;flex-direction:column;gap:8px}
+.bd{background:radial-gradient(ellipse at 20% 15%,rgba(255,255,255,.07),transparent 55%),radial-gradient(ellipse at 80% 85%,rgba(255,255,255,.05),transparent 50%),#191b1a;border:10px solid #6b4a2b;border-radius:10px;box-shadow:inset 0 0 30px rgba(0,0,0,.65);height:68vh;min-height:360px;overflow:auto;cursor:grab;color:#f4f3ee;font-family:"Chalkboard SE","Bradley Hand","Segoe Print","Comic Neue",cursive;-webkit-overflow-scrolling:touch}
+.bdi{display:flex;gap:44px;align-items:flex-start;padding:28px 36px 80px;width:max-content;min-width:100%}
+.pj{width:230px;flex:none}
+.pt{display:flex;align-items:center;gap:4px;color:var(--ch);font-size:24px;font-weight:700;border-bottom:2px dashed var(--ch);padding-bottom:4px;text-shadow:0 0 2px color-mix(in srgb,var(--ch) 60%,transparent)}
+.pt span{flex:1;word-break:break-word}
+.pt button{background:none;border:none;color:var(--ch);opacity:.55;padding:2px 5px;font-size:14px;font-family:system-ui}
+.pj ul{list-style:none;margin:10px 0 4px;padding:0}
+.ii{display:flex;gap:8px;font-size:18px;line-height:1.35;margin:8px 0;text-shadow:0 0 1px rgba(255,255,255,.5)}
+.ii .ck{cursor:pointer;opacity:.85}.ii .tx{flex:1;cursor:pointer;word-break:break-word}
+.ii small{display:block;opacity:.6;font-size:13px}
+.ii.dn2 .tx{text-decoration:line-through;opacity:.45}
+.addi{background:none;border:none;color:#f4f3ee;opacity:.4;font:inherit;font-size:15px;padding:4px 0}
+.bde{padding:48px 24px;font-size:20px;opacity:.8;text-align:center}
+.sw{display:flex;gap:8px;flex-wrap:wrap}.sw i{display:inline-block;width:26px;height:26px;border-radius:50%;background:var(--c);border:2px solid transparent;cursor:pointer}.sw i.on{border-color:var(--tx)}
+#cs[hidden]{display:none}
+.bd{font-family:"Roboto Condensed","sans-serif-condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.bd button{text-transform:uppercase}.bd .pt button{text-transform:none;letter-spacing:0;font-size:12px}
+.bdi{gap:34px;padding:22px 28px 70px}.pj{width:190px}
+.pt{font-size:15px;font-weight:800;letter-spacing:.1em}
+.pj ul{margin:8px 0 2px}
+.ii{font-size:12.5px;line-height:1.3;margin:6px 0;gap:7px;letter-spacing:.06em}
+.ii small{font-size:10px;font-weight:600}
+.addi{font-size:11px;letter-spacing:.1em}
+.bde{font-size:14px;letter-spacing:.08em}
+.bd .sw{margin:8px 0 0}.bd .sw i{width:20px;height:20px}.bd .sw i.on{border-color:#fff}
+.pj{width:200px}.bdi{gap:38px}
+.pt{flex-wrap:wrap;gap:0;font-size:13px;letter-spacing:.12em;line-height:1.45;padding-bottom:6px}
+.pt span{flex:1 1 100%;word-break:normal;overflow-wrap:break-word;hyphens:none}
+.bd .pt button{font-size:11px;padding:4px 8px 0 0;opacity:.5}
+.pj ul{margin:12px 0 4px}
+.ii{font-size:11px;line-height:1.5;margin:11px 0;letter-spacing:.12em}
+.ii .tx{word-break:normal;overflow-wrap:break-word;hyphens:none}
+.ii small{font-size:9px;letter-spacing:.1em;margin-top:2px}
+.addi{font-size:10px;letter-spacing:.14em;margin-top:4px}
+.bde{font-size:12px}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4efe3"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ray">
 </head>
 <body>
 <main>
 <div class="hd"><svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke-linecap="round" stroke-width="3.2"><path d="M6 26L11.2 6.7" stroke="#4f7be8"/><path d="M6 26L17.5 9.6" stroke="#34a36b"/><path d="M6 26L22.4 14.5" stroke="#e07a2f"/><path d="M6 26L25.3 20.8" stroke="#8c6fd0"/></svg><div><h1>Ray</h1><div class="hi" id="hello"></div></div></div>
-<div class="tabs"><button data-tab="list" class="on">List</button><button data-tab="tl">Timeline</button></div>
+<div class="tabs"><button data-tab="list" class="on">List</button><button data-tab="tl">Timeline</button><button data-tab="bd">Board</button></div>
 <div class="filters" id="filters"></div>
 <div id="now"></div>
 <div id="view"></div>
@@ -111,11 +149,13 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 <button id="fab" aria-label="Nuova attività">+</button>
 <div id="modal" hidden><div class="sheet">
 <div class="sh"><b id="mt">Nuova attività</b><button class="ic" id="mx">✕</button></div>
+<div class="seg" id="seg"><button type="button" data-m="todo" class="on">To-do</button><button type="button" data-m="idea">💡 Idea</button></div>
 <input id="in" type="text" placeholder="Es. Pagare TARI entro 16/12 · Dentista figlia domani alle 17" autocomplete="off">
 <div class="prev" id="prev"></div>
 <div class="fr"><label>Data<input type="date" id="fd"></label><label>Ora<input type="time" id="ft"></label></div>
-<div class="cats" id="fc"></div>
-<div class="chips" id="chips"></div>
+<div id="todoOnly"><div class="cats" id="fc"></div>
+<div class="chips" id="chips"></div></div>
+<div id="ideaOnly" hidden><div class="note">Group</div><div class="cats" id="fg"></div><input id="ng" type="text" placeholder="Nome del nuovo gruppo" autocomplete="off"><div class="sw" id="cs" hidden></div></div>
 <button class="pri" id="addb">Aggiungi</button>
 <button id="delb" type="button" hidden>🗑 Elimina attività</button>
 </div></div>
@@ -190,24 +230,33 @@ function item(t){
 }
 function hello(){const n=new Date(),dn=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'][n.getDay()],o=tasks.filter(t=>!t.done&&t.due),td=o.filter(t=>t.due===today()).length,ov=o.filter(t=>t.due<today()).length;
   $('#hello').textContent=dn+' '+n.getDate()+' '+MON[n.getMonth()]+' · '+(td?td+(td===1?' cosa per oggi':' cose per oggi'):'niente in scadenza oggi')+(ov?' · '+ov+' in ritardo':'')}
+function ideaItem(i){const p=BD.projects.find(x=>x.id===i.pid)||{name:'',color:'#d9c34a'};
+  return `<div class="t ${i.done?'done':''}" style="--cl:${p.color}"><input type="checkbox" data-act="idone" data-id="${i.id}" ${i.done?'checked':''} aria-label="Done"><div class="b" data-act="iedit" data-id="${i.id}"><div class="ti">${esc(i.text)}</div><div class="m"><span class="tag">💡 ${esc(p.name)}</span>${fmtDate(i.due)}${i.time?' · '+i.time:''} · ${rel(i.due)}</div></div></div>`}
+function boardView(){
+  if(!BD.projects.length)return '<div class="bd"><div class="bde">La lavagna è vuota.<br>Tocca + e scegli “Idea” per iniziare il primo progetto.</div></div>';
+  return '<div class="bd"><div class="bdi">'+BD.projects.map(p=>{
+    const its=BD.ideas.filter(i=>i.pid===p.id);
+    return `<div class="pj" style="--ch:${p.color}"><div class="pt"><span>${esc(p.name)}</span><button data-act="pcol" data-id="${p.id}" title="Colore">🎨</button><button data-act="pren" data-id="${p.id}" title="Rename">✎</button><button data-act="pdel" data-id="${p.id}" title="Delete">✕</button></div>${pcol===p.id?`<div class="sw">${CHALK.map(c=>`<i style="--c:${c}" data-pc="${c}" data-pid="${p.id}" class="${c===p.color?'on':''}"></i>`).join('')}</div>`:''}<ul>${its.map(i=>`<li class="ii${i.done?' dn2':''}"><span class="ck" data-act="idone" data-id="${i.id}">${i.done?'✓':'○'}</span><span class="tx" data-act="iedit" data-id="${i.id}">${esc(i.text)}${i.due?` <small>📅 ${fmtDate(i.due)}</small>`:''}</span></li>`).join('')}</ul><button class="addi" data-act="padd" data-id="${p.id}">+ add</button></div>`}).join('')+'</div></div>';
+}
 function doneView(T){
   const dn=T.filter(t=>t.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0)||tdate(b).localeCompare(tdate(a)));
   if(!dn.length)return '<div class="empty">Nessuna attività completata.</div>';
   return '<div class="note" style="margin-bottom:8px">Tocca la spunta per riaprire un’attività, o toccala per modificarla.</div>'+dn.map(item).join('')+'<button data-act="clear" style="margin-top:8px">Elimina tutte le completate</button>';
 }
-function filters(){$('#filters').innerHTML=CK.map(c=>`<button class="fl c-${c}${hidden.has(c)?' off':''}" data-cat="${c}">${CATS[c]}</button>`).join('')+`<button class="fl dn${tab==='done'?' on':''}" data-tab="done">✓ Done</button>`}
+function filters(){$('#filters').innerHTML=CK.map(c=>`<button class="fl c-${c}${hidden.has(c)?' off':''}" data-cat="${c}">${CATS[c]}</button>`).join('')+`<button class="fl c-idea${hidden.has('idea')?' off':''}" data-cat="idea">💡 Ideas</button><button class="fl dn${tab==='done'?' on':''}" data-tab="done">✓ Done</button>`}
 function timeline(open){
-  const vc=CK.filter(c=>!hidden.has(c)),dated=open.filter(t=>t.due),by={},gh={};
+  const vc=[...CK,'idea'].filter(c=>!hidden.has(c)),dated=open.filter(t=>t.due),by={},gh={},ib={},IDs=hidden.has('idea')?[]:BD.ideas.filter(i=>i.due&&!i.done);
+  IDs.forEach(i=>(ib[i.due]=ib[i.due]||[]).push(i));
   dated.forEach(t=>{(by[t.due]=by[t.due]||[]).push(t);(t.rem||[]).filter(r=>r>0).forEach(r=>{const d=addDays(t.due,-r);if(d>=today())(gh[d]=gh[d]||[]).push([t,r])})});
   let d=today(),e=addDays(d,13);
-  dated.forEach(t=>{if(t.due<d)d=t.due;if(t.due>e)e=t.due});
+  dated.concat(IDs).forEach(t=>{if(t.due<d)d=t.due;if(t.due>e)e=t.due});
   const mx=addDays(today(),120);let cut=false;if(e>mx){e=mx;cut=true}
   let h='<div class="tg">',last='';
   while(d<=e){
-    const dt=fromYmd(d),n=diff(d),ts=by[d]||[],gs=gh[d]||[],mk=MON[dt.getMonth()]+' '+dt.getFullYear();
+    const dt=fromYmd(d),n=diff(d),ts=by[d]||[],is=ib[d]||[],gs=gh[d]||[],mk=MON[dt.getMonth()]+' '+dt.getFullYear();
     if(mk!==last){h+=`<div class="mh">${mk}</div>`;last=mk}
-    const rail=vc.map(c=>`<i class="ln c-${c}${ts.some(t=>t.cat===c)?' dot':''}"></i>`).join('');
-    h+=`<div class="r${n===0?' td':''}${[0,6].includes(dt.getDay())?' we':''}"><div class="dd"><b>${dt.getDate()}</b> ${n===0?'oggi':WDS[dt.getDay()]}</div><div class="rl">${rail}</div><div class="rc">${ts.map(item).join('')}${gs.map(([t,r])=>`<div class="ghost c-${t.cat}">🔔 ${esc(t.title)} · tra ${r} gg</div>`).join('')}</div></div>`;
+    const rail=vc.map(c=>`<i class="ln c-${c}${(c==='idea'?is.length:ts.some(t=>t.cat===c))?' dot':''}"></i>`).join('');
+    h+=`<div class="r${n===0?' td':''}${[0,6].includes(dt.getDay())?' we':''}"><div class="dd"><b>${dt.getDate()}</b> ${n===0?'oggi':WDS[dt.getDay()]}</div><div class="rl">${rail}</div><div class="rc">${ts.map(item).join('')}${is.map(ideaItem).join('')}${gs.map(([t,r])=>`<div class="ghost c-${t.cat}">🔔 ${esc(t.title)} · tra ${r} gg</div>`).join('')}</div></div>`;
     d=addDays(d,1);
   }
   h+='</div>'+(cut?'<div class="note">Mostro i prossimi 120 giorni.</div>':'');
@@ -227,8 +276,8 @@ function render(){
     open.filter(t=>!active(t)).forEach(t=>{if(!t.due)g['Senza data'].push(t);else{const n=diff(t.due);(n<0?g.Scaduti:n===0?g.Oggi:n<=7?g['Prossimi 7 giorni']:g['Più avanti']).push(t)}});
     for(const k in g)if(g[k].length)h+=`<h3>${k}</h3>`+g[k].map(item).join('');
     if(!h)h='<div class="empty">'+(T.length?'Tutto fatto! Trovi le completate con ✓ Done, sotto i filtri.':'Nessuna attività. Tocca il + per aggiungerne una.')+'</div>';
-  }else if(tab==='done'){h=doneView(T)}else h=timeline(open);
-  $('#view').innerHTML=h;justDone=null;
+  }else if(tab==='done'){h=doneView(T)}else if(tab==='bd'){h=boardView()}else h=timeline(open);
+  $('#view').innerHTML=h;justDone=null;$('#filters').hidden=tab==='bd';if(tab==='bd')$('#now').innerHTML='';
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
 }
 
@@ -255,46 +304,85 @@ function icsText(){
   L.push('END:VCALENDAR');return L.join('\r\n');
 }
 
-let touched={},fcat='altro';
+const BK='ray_board_v1',CHALK=['#f4d35e','#ff9aa2','#8ecae6','#95d5b2','#ffb36b','#c3a6ff','#ef6f6c','#7fdbda'],nid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+let BD={projects:[],ideas:[]};try{const b=JSON.parse(localStorage.getItem(BK)||'null');if(b&&Array.isArray(b.projects)&&Array.isArray(b.ideas))BD=b}catch(e){}
+function saveB(){try{localStorage.setItem(BK,JSON.stringify(BD))}catch(e){}render()}
+let touched={},fcat='altro',editing=null,mode='todo',fgrp=null,ncol=CHALK[0],pcol=null;
+function renderSw(){const el=$('#cs');el.hidden=fgrp!=='new';el.innerHTML=CHALK.map(c=>`<i style="--c:${c}" data-sw="${c}" class="${c===ncol?'on':''}"></i>`).join('')}
 function renderCats(){$('#fc').innerHTML=CK.map(c=>`<button type="button" class="cc c-${c}${fcat===c?' on':''}" data-c="${c}">${fcat===c?'✓ ':''}${CATS[c]}</button>`).join('')}
-function upd(){if(editing){$('#prev').textContent='';return}const v=$('#in').value.trim();if(!v){$('#prev').textContent='';return}const p=parse(v),d=$('#fd').value,r=d?REM[fcat]:[];
+function renderGroups(){
+  $('#fg').innerHTML=BD.projects.map(p=>`<button type="button" class="cc${fgrp===p.id?' on':''}" style="--cl:${p.color}" data-g="${p.id}">${fgrp===p.id?'✓ ':''}${esc(p.name)}</button>`).join('')+`<button type="button" class="cc${fgrp==='new'?' on':''}" data-g="new">${fgrp==='new'?'✓ ':''}＋ Nuovo gruppo</button>`;
+  $('#ng').hidden=fgrp!=='new';renderSw();
+}
+function defGroup(){fgrp=fgrp||(BD.projects.length?BD.projects[0].id:'new');renderGroups()}
+function setMode(m){mode=m;$('#todoOnly').hidden=m!=='todo';$('#ideaOnly').hidden=m!=='idea';
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  $('#in').placeholder=m==='todo'?'Es. Pagare TARI entro 16/12 · Dentista figlia domani alle 17':'Descrivi l’idea…'}
+function upd(){if(editing){$('#prev').textContent='';return}const v=$('#in').value.trim();if(!v){$('#prev').textContent='';return}const p=parse(v),d=$('#fd').value,r=(mode==='todo'&&d)?REM[fcat]:[];
   $('#prev').textContent='→ '+p.title+(r.length?' · 🔔 '+r.map(x=>x+'g').join('/'):'')}
-let editing=null;
-function openM(t){editing=t||null;
-  $('#in').value=t?t.title:'';$('#fd').value=t&&t.due||'';$('#ft').value=t&&t.time||'';
-  touched=t?{d:1,t:1,c:1}:{};fcat=t?(t.cat||'altro'):'altro';renderCats();$('#prev').textContent='';
-  $('#mt').textContent=t?'Modifica attività':'Nuova attività';$('#addb').textContent=t?'Salva modifiche':'Aggiungi';$('#delb').hidden=!t;
+function openM(t,o){o=o||{};editing=t||null;
+  const idea=t?!!t.pid:o.mode==='idea';
+  setMode(idea?'idea':'todo');$('#seg').hidden=!!t;
+  $('#in').value=t?(idea?t.text:t.title):'';$('#fd').value=t&&t.due||'';$('#ft').value=t&&t.time||'';
+  touched=t?{d:1,t:1,c:1}:{};fcat=(t&&!idea)?(t.cat||'altro'):'altro';renderCats();
+  fgrp=idea?(t?t.pid:(o.pid||null)):null;ncol=CHALK[BD.projects.length%CHALK.length];if(idea)defGroup();$('#ng').value='';
+  $('#prev').textContent='';
+  $('#mt').textContent=t?(idea?'Modifica idea':'Modifica attività'):'Nuovo';$('#addb').textContent=t?'Salva modifiche':'Aggiungi';$('#delb').hidden=!t;
   $('#modal').hidden=false;if(!t)setTimeout(()=>$('#in').focus(),50)}
 function closeM(){$('#modal').hidden=true}
 function add(){const raw=$('#in').value.trim();if(!raw)return;const due=$('#fd').value||null,time=due?($('#ft').value||null):null;
+  if(mode==='idea'){
+    let pid=fgrp;
+    if(pid==='new'||!BD.projects.some(p=>p.id===pid)){const nm=$('#ng').value.trim();if(!nm){fgrp='new';renderGroups();$('#ng').placeholder='Scrivi il nome del gruppo';$('#ng').focus();return}
+      pid=nid();BD.projects.push({id:pid,name:nm,color:ncol})}
+    if(editing)Object.assign(editing,{text:raw,due,time,pid});
+    else{const p=parse(raw);BD.ideas.push({id:nid(),pid,text:p.title,due,time,done:false})}
+    closeM();saveB();return}
   if(editing)Object.assign(editing,{title:raw,due,time,cat:fcat,rem:due?REM[fcat]:[]});
-  else{const p=parse(raw);tasks.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),title:p.title,due,time,cat:fcat,rem:due?REM[fcat]:[],done:false})}
+  else{const p=parse(raw);tasks.push({id:nid(),title:p.title,due,time,cat:fcat,rem:due?REM[fcat]:[],done:false})}
   closeM();save();}
-$('#fab').onclick=()=>openM();$('#delb').onclick=()=>{if(editing&&confirm('Eliminare questa attività?')){tasks=tasks.filter(x=>x!==editing);closeM();save()}};$('#mx').onclick=closeM;$('#addb').onclick=add;
+$('#fab').onclick=()=>openM(null,{mode:tab==='bd'?'idea':'todo'});
+$('#delb').onclick=()=>{if(!editing||!confirm('Eliminare?'))return;
+  if(mode==='idea'){BD.ideas=BD.ideas.filter(x=>x!==editing);closeM();saveB()}else{tasks=tasks.filter(x=>x!==editing);closeM();save()}};
+$('#mx').onclick=closeM;$('#addb').onclick=add;
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeM()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
 $('#in').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
 $('#in').addEventListener('input',()=>{const p=parse($('#in').value.trim());
   if(!touched.d)$('#fd').value=p.due||'';
   if(!touched.t)$('#ft').value=p.time||'';
-  if(!touched.c){fcat=p.cat;renderCats()}
+  if(mode==='todo'&&!touched.c){fcat=p.cat;renderCats()}
   upd()});
 $('#fd').addEventListener('change',()=>{touched.d=true;upd()});
 $('#ft').addEventListener('change',()=>{touched.t=true});
 document.addEventListener('click',e=>{
   const c=e.target.closest('[data-c]');if(c){fcat=c.dataset.c;touched.c=true;renderCats();upd();return}
+  const sw=e.target.closest('[data-sw]');if(sw){ncol=sw.dataset.sw;renderSw();return}
+  const g=e.target.closest('[data-g]');if(g){fgrp=g.dataset.g;renderGroups();if(fgrp==='new')$('#ng').focus();return}
+  const m=e.target.closest('[data-m]');if(m){setMode(m.dataset.m);if(m.dataset.m==='idea')defGroup();else renderCats();return}
   const f=e.target.closest('[data-cat]');if(f){const k=f.dataset.cat;hidden.has(k)?hidden.delete(k):hidden.add(k);try{localStorage.setItem('au_hidden',JSON.stringify([...hidden]))}catch(x){}render()}
 });
 document.addEventListener('click',e=>{
   const tb=e.target.closest('[data-tab]');if(tb){tab=(tb.dataset.tab==='done'&&tab==='done')?'list':tb.dataset.tab;render();return}
+  const pc=e.target.closest('[data-pc]');if(pc){const p=BD.projects.find(x=>x.id===pc.dataset.pid);if(p){p.color=pc.dataset.pc;pcol=null;saveB()}return}
   const b=e.target.closest('[data-act]');if(!b)return;
-  const t=tasks.find(x=>x.id===b.dataset.id),a=b.dataset.act;
+  const a0=b.dataset.act,id0=b.dataset.id,ib=BD.ideas.find(x=>x.id===id0),pb=BD.projects.find(x=>x.id===id0);
+  if(a0==='idone'){if(ib){ib.done=b.tagName==='INPUT'?b.checked:!ib.done;saveB()}return}
+  if(a0==='iedit'){if(ib)openM(ib);return}
+  if(a0==='pcol'){pcol=pcol===id0?null:id0;render();return}
+  if(a0==='padd'){openM(null,{mode:'idea',pid:id0});return}
+  if(a0==='pren'){if(pb){const n=prompt('Rinomina il gruppo',pb.name);if(n&&n.trim()){pb.name=n.trim();saveB()}}return}
+  if(a0==='pdel'){if(pb&&confirm('Eliminare il gruppo “'+pb.name+'” e le sue idee?')){BD.projects=BD.projects.filter(x=>x!==pb);BD.ideas=BD.ideas.filter(x=>x.pid!==id0);saveB()}return}
+  const t=tasks.find(x=>x.id===id0),a=a0;
   if(a==='done'&&t){t.done=b.checked;t.doneAt=t.done?Date.now():0;justDone=t.done?t.id:null;save()}
   else if(a==='del'&&t){if(confirm('Eliminare questa attività?')){tasks=tasks.filter(x=>x!==t);save()}}
   else if(a==='edit'&&t){openM(t)}
   else if(a==='gcal'&&t){window.open(gcalUrl(t),'_blank','noopener')}
   else if(a==='clear'){if(confirm('Eliminare definitivamente le attività completate?')){tasks=tasks.filter(x=>!x.done||hidden.has(x.cat));save()}}
 });
+(()=>{let d=null;document.addEventListener('mousedown',e=>{const el=e.target.closest('.bd');if(!el||e.target.closest('[data-act]'))return;d={x:e.clientX,y:e.clientY,l:el.scrollLeft,t:el.scrollTop,el}});
+window.addEventListener('mousemove',e=>{if(d){d.el.scrollLeft=d.l-(e.clientX-d.x);d.el.scrollTop=d.t-(e.clientY-d.y)}});window.addEventListener('mouseup',()=>{d=null})})();
+
 // Scadenze ricorrenti suggerite (da verificare)
 [['IMU saldo 16/12','#scadenze'],['Acconto imposte 30/11','#scadenze'],['IMU acconto 16/06','#scadenze'],['730 / dichiarazione redditi 30/09','#scadenze'],['TARI rata','#scadenze'],['Bollo auto','#scadenze'],['RCA assicurazione auto','#scadenze']].forEach(([l,c])=>{
   const b=document.createElement('button');b.className='chip';b.textContent='+ '+l;
