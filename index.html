@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ray</title>
+<title>Timeline</title>
 <style>
 :root{--bg:#f6f5f1;--card:#fff;--tx:#1d1d1b;--mut:#6b6a65;--bd:#e3e1da;--ac:#2f5fd0;--red:#c0392b;--amb:#b7791f;--grn:#2f8f5b;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171716;--card:#222220;--tx:#eeede8;--mut:#9b9a93;--bd:#34332f;--ac:#7ba0ff;--red:#ff7b6b;--amb:#f0b64d;--grn:#5fcf94;color-scheme:dark}}
@@ -180,12 +180,12 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 .dz.dzt{outline:1px dashed rgba(255,255,255,.4);outline-offset:3px}
 .sn span.sel{outline:1px dashed #fff;outline-offset:3px}
 </style>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4efe3"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ray">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4efe3"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Timeline">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="chalk" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.8" xChannelSelector="R" yChannelSelector="G" result="d"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -2.4 1.85" result="sp"/><feComposite in="d" in2="sp" operator="in"/></filter></defs></svg>
 <main>
-<div class="hd"><svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke-linecap="round" stroke-width="3.2"><path d="M6 26L11.2 6.7" stroke="#4f7be8"/><path d="M6 26L17.5 9.6" stroke="#34a36b"/><path d="M6 26L22.4 14.5" stroke="#e07a2f"/><path d="M6 26L25.3 20.8" stroke="#8c6fd0"/></svg><div><h1>Ray</h1><div class="hi" id="hello"></div></div></div>
+<div class="hd"><svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke-width="2.6"><path d="M4 7H11L21 21H28" stroke="#4f7be8"/><path d="M4 13H11L21 25H28" stroke="#34a36b"/><path d="M4 19H11L21 7H28" stroke="#e07a2f"/><path d="M4 25H11L21 13H28" stroke="#8c6fd0"/></g><g fill="#fff" stroke-width="1.5"><circle cx="4" cy="7" r="2" stroke="#4f7be8"/><circle cx="11" cy="7" r="2" stroke="#4f7be8"/><circle cx="21" cy="21" r="2" stroke="#4f7be8"/><circle cx="28" cy="21" r="2" stroke="#4f7be8"/><circle cx="4" cy="13" r="2" stroke="#34a36b"/><circle cx="11" cy="13" r="2" stroke="#34a36b"/><circle cx="21" cy="25" r="2" stroke="#34a36b"/><circle cx="28" cy="25" r="2" stroke="#34a36b"/><circle cx="4" cy="19" r="2" stroke="#e07a2f"/><circle cx="11" cy="19" r="2" stroke="#e07a2f"/><circle cx="21" cy="7" r="2" stroke="#e07a2f"/><circle cx="28" cy="7" r="2" stroke="#e07a2f"/><circle cx="4" cy="25" r="2" stroke="#8c6fd0"/><circle cx="11" cy="25" r="2" stroke="#8c6fd0"/><circle cx="21" cy="13" r="2" stroke="#8c6fd0"/><circle cx="28" cy="13" r="2" stroke="#8c6fd0"/></g></svg><div><h1>Timeline</h1><div class="hi" id="hello"></div></div></div>
 <div class="tabs"><button data-tab="list" class="on">List</button><button data-tab="tl">Timeline</button><button data-tab="bd">Board</button></div>
 <div class="filters" id="filters"></div>
 <div id="now"></div>
@@ -568,15 +568,15 @@ document.addEventListener('click',e=>{
   const b=document.createElement('button');b.className='chip';b.textContent='+ '+l;
   b.onclick=()=>{const i=$('#in');i.value=l+' #deadlines'+(/\d/.test(l)?' ogni anno':'');i.focus();i.dispatchEvent(new Event('input'))};$('#chips').appendChild(b);
 });
-$('#bk').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({app:'ray',v:1,exported:new Date().toISOString(),tasks,board:BD})],{type:'application/json'}));a.download='ray-backup-'+today()+'.json';document.body.appendChild(a);a.click();a.remove();$('#sync').textContent='Backup scaricato'};
+$('#bk').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({app:'timeline',v:1,exported:new Date().toISOString(),tasks,board:BD})],{type:'application/json'}));a.download='timeline-backup-'+today()+'.json';document.body.appendChild(a);a.click();a.remove();$('#sync').textContent='Backup scaricato'};
 $('#rs').onclick=()=>$('#rf').click();
-$('#rf').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.app!=='ray'||!Array.isArray(d.tasks))throw 0;const b=d.board||{};
+$('#rf').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if((d.app!=='timeline'&&d.app!=='ray')||!Array.isArray(d.tasks))throw 0;const b=d.board||{};
   if(!confirm('Sostituire i dati attuali con il backup ('+d.tasks.length+' attività, '+(Array.isArray(b.ideas)?b.ideas.length:0)+' idee)?'))return;
   tasks=d.tasks;BD={projects:Array.isArray(b.projects)?b.projects:[],ideas:Array.isArray(b.ideas)?b.ideas:[],links:Array.isArray(b.links)?b.links:[],subs:Array.isArray(b.subs)?b.subs:[]};
   try{localStorage.setItem(BK,JSON.stringify(BD))}catch(x){}save();$('#sync').textContent='Backup ripristinato'}catch(x){alert('File non valido')}};r.readAsText(f);e.target.value=''};
 $('#ics').onclick=async()=>{
   const dl=window.claude?await claude.use('downloads').catch(()=>null):null;
-  try{if(dl){await dl.save({filename:'ray.ics',data:icsText()})}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([icsText()],{type:'text/calendar'}));a.download='ray.ics';document.body.appendChild(a);a.click();a.remove()}}
+  try{if(dl){await dl.save({filename:'timeline.ics',data:icsText()})}else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([icsText()],{type:'text/calendar'}));a.download='timeline.ics';document.body.appendChild(a);a.click();a.remove()}}
   catch(e){$('#sync').textContent='Download .ics non disponibile qui: usa il 📅 su ogni attività.'}
 };
 render();

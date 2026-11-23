@@ -1,6 +1,6 @@
 {
- "name": "Ray",
- "short_name": "Ray",
+ "name": "Timeline",
+ "short_name": "Timeline",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
