@@ -179,6 +179,18 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 .sa button{background:none;border:none;color:#f4f3ee;font:inherit;font-size:9px;letter-spacing:.12em;padding:3px 6px 3px 0;text-transform:uppercase}
 .dz.dzt{outline:1px dashed rgba(255,255,255,.4);outline-offset:3px}
 .sn span.sel{outline:1px dashed #fff;outline-offset:3px}
+.sn span{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.sb.rg{z-index:6;opacity:.85}
+.rb{margin-top:6px}
+.fsb{display:none}
+@media (min-width:900px){
+ .fsb{display:inline-block;font-size:14px;padding:2px 9px;border-radius:99px}
+ body.bdfull main{max-width:none;padding:10px 18px 0}
+ body.bdfull .hd,body.bdfull .foot,body.bdfull main>.note,body.bdfull #now,body.bdfull #filters{display:none}
+ body.bdfull .tabs{margin:0 0 8px}
+ body.bdfull .bs{height:calc(100vh - 150px);min-height:360px}
+ body.bdfull .wp{width:230px}
+}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4efe3"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Timeline">
 </head>
@@ -286,21 +298,21 @@ let linkMode=false,linkSrc=null;
 const hh=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
 const rot=(id,k)=>(((hh(id)%200)/100)-1)*k;
 function unlink(keys){BD.links=BD.links.filter(l=>!keys.includes(l.a)&&!keys.includes(l.b))}
-function autoPlace(){const H=[0,0,0,0],n=p=>BD.ideas.filter(i=>i.pid===p.id).length+BD.subs.filter(s=>s.pid===p.id).length*1.5;
-  BD.projects.forEach(p=>{if(typeof p.x==='number'){const c=Math.max(0,Math.min(3,Math.round((p.x-30)/250)));H[c]=Math.max(H[c],p.y+110+n(p)*34)}});
-  BD.projects.forEach(p=>{if(typeof p.x!=='number'){let c=0;for(let k=1;k<4;k++)if(H[k]<H[c])c=k;p.x=30+c*250+Math.round(Math.random()*14);p.y=H[c]+24+Math.round(Math.random()*12);H[c]=p.y+110+n(p)*34}})}
+function autoPlace(){const NC=Math.max(4,Math.min(8,Math.floor((innerWidth-60)/250))),H=Array(NC).fill(0),n=p=>BD.ideas.filter(i=>i.pid===p.id).length+BD.subs.filter(s=>s.pid===p.id).length*1.5;
+  BD.projects.forEach(p=>{if(typeof p.x==='number'){const c=Math.max(0,Math.min(NC-1,Math.round((p.x-30)/250)));H[c]=Math.max(H[c],p.y+110+n(p)*34)}});
+  BD.projects.forEach(p=>{if(typeof p.x!=='number'){let c=0;for(let k=1;k<NC;k++)if(H[k]<H[c])c=k;p.x=30+c*250+Math.round(Math.random()*14);p.y=H[c]+24+Math.round(Math.random()*12);H[c]=p.y+110+n(p)*34}})}
 function ul(color,id){const a=hh(id)%5-2;return `<svg class="ul" viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M2 ${6+a} C 40 ${2+a}, 70 ${9-a}, 110 ${5+a} S 170 ${3-a}, 198 ${6+a}" stroke="${color}"/></svg>`}
 function ideaLi(i){return `<li class="wi${i.done?' dn2':''}" style="margin-left:${hh(i.id)%6}px;transform:rotate(${rot(i.id,.9).toFixed(2)}deg)"><span class="ck" data-act="idone" data-id="${i.id}">${i.done?'✓':'○'}</span><span class="tx${linkSrc==='i:'+i.id?' sel':''}" data-node="i:${i.id}" data-act="iedit" data-id="${i.id}">${esc(i.text)}${i.due?` <small>· ${fmtDate(i.due)}</small>`:''}</span></li>`}
 function boardView(){
   if(!BD.projects.length)return '<div class="bw"><div class="bs"><div class="bde">La lavagna è vuota.<br>Tocca + e scegli “Idea” per iniziare il primo progetto.</div></div><div class="tray"></div></div>';
   autoPlace();
-  const tools=`<div class="wk"><button data-act="linkmode" class="${linkMode?'on':''}">🔗 Collega</button><span class="note">${linkMode?(linkSrc?'Ora tocca l’elemento di arrivo':'Tocca l’elemento di partenza'):'Trascina titoli e pallini ○ (anche tra sottoprogetti) · tocca una freccia per eliminarla'}</span></div>`;
+  const tools=`<div class="wk"><button data-act="linkmode" class="${linkMode?'on':''}">🔗 Collega</button><button data-act="fs" class="fsb" title="Schermo intero">⛶</button><span class="note">${linkMode?(linkSrc?'Ora tocca l’elemento di arrivo':'Tocca l’elemento di partenza'):'Trascina titoli, sottoprogetti e pallini ○ per spostarli · tocca una freccia per eliminarla'}</span></div>`;
   const ps=BD.projects.map(p=>{
     const subs=BD.subs.filter(s=>s.pid===p.id),ids=new Set(subs.map(s=>s.id)),mine=BD.ideas.filter(i=>i.pid===p.id),
       root=mine.filter(i=>!(i.sid&&ids.has(i.sid))),
       sw=pcol===p.id?`<div class="sw">${CHALK.map(c=>`<i style="--c:${c}" data-pc="${c}" data-pid="${p.id}" class="${c===p.color?'on':''}"></i>`).join('')}</div>`:'';
     const sbs=subs.map(sb=>`<div class="sb dz" data-pid="${p.id}" data-sid="${sb.id}"><div class="sn"><span data-node="s:${sb.id}" class="${linkSrc==='s:'+sb.id?'sel':''}">${esc(sb.name)}</span></div>${ul(p.color,sb.id).replace('class="ul"','class="ul sm"')}<ul class="wl">${mine.filter(i=>i.sid===sb.id).map(ideaLi).join('')}</ul><div class="sa"><button data-act="siadd" data-id="${sb.id}">+ add</button><button data-act="sren" data-id="${sb.id}" title="Rinomina">✎</button><button data-act="sdel" data-id="${sb.id}" title="Elimina">✕</button></div></div>`).join('');
-    return `<div class="wp" data-pid="${p.id}" style="--ch:${p.color};left:${p.x}px;top:${p.y}px;transform:rotate(${rot(p.id,1.4).toFixed(2)}deg)"><div class="wt"><span class="dh${linkSrc==='p:'+p.id?' sel':''}" data-node="p:${p.id}">${esc(p.name)}</span></div>${ul(p.color,p.id)}${sw}<div class="rb dz" data-pid="${p.id}" data-sid=""><ul class="wl">${root.map(ideaLi).join('')}</ul></div>${sbs}<div class="wa"><button data-act="padd" data-id="${p.id}">+ add</button><button data-act="sadd" data-id="${p.id}">+ sub</button><button data-act="pcol" data-id="${p.id}" title="Colore">🎨</button><button data-act="pren" data-id="${p.id}" title="Rinomina">✎</button><button data-act="pdel" data-id="${p.id}" title="Elimina">✕</button></div></div>`}).join('');
+    return `<div class="wp" data-pid="${p.id}" style="--ch:${p.color};left:${p.x}px;top:${p.y}px;transform:rotate(${rot(p.id,1.4).toFixed(2)}deg)"><div class="wt"><span class="dh${linkSrc==='p:'+p.id?' sel':''}" data-node="p:${p.id}">${esc(p.name)}</span></div>${ul(p.color,p.id)}${sw}${sbs}<div class="rb dz" data-pid="${p.id}" data-sid=""><ul class="wl">${root.map(ideaLi).join('')}</ul></div><div class="wa"><button data-act="padd" data-id="${p.id}">+ add</button><button data-act="sadd" data-id="${p.id}">+ sub</button><button data-act="pcol" data-id="${p.id}" title="Colore">🎨</button><button data-act="pren" data-id="${p.id}" title="Rinomina">✎</button><button data-act="pdel" data-id="${p.id}" title="Elimina">✕</button></div></div>`}).join('');
   return tools+`<div class="bw"><div class="bs"><div class="cv"><svg class="ar" id="ar"></svg>${ps}</div></div><div class="tray"><i style="left:18px;width:26px;transform:rotate(-4deg)"></i><i style="left:52px;width:18px;background:#f4d35e;transform:rotate(3deg)"></i><b></b></div></div>`;
 }
 function trect(el){try{const r=document.createRange();r.selectNodeContents(el);const b=r.getBoundingClientRect();if(b&&b.width)return b}catch(e){}return el.getBoundingClientRect()}
@@ -380,6 +392,30 @@ const endR=()=>{if(!rdrag)return;const r=rdrag;rdrag=null;clearDz();if(!r.moved)
   else BD.ideas.push(idea);
   saveB()};
 document.addEventListener('pointerup',endR);document.addEventListener('pointercancel',endR);
+const pjAt=(x,y)=>[...document.querySelectorAll('.wp')].find(z=>{const b=z.getBoundingClientRect();return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom});
+let sdrag=null;
+document.addEventListener('pointerdown',e=>{const h=e.target.closest('.sn span');if(!h||linkMode||drag||rdrag)return;const el=h.closest('.sb');
+  sdrag={id:el.dataset.sid,el,sx:e.clientX,sy:e.clientY,px:e.clientX,py:e.clientY,moved:false,raf:0};try{h.setPointerCapture(e.pointerId)}catch(x){}});
+document.addEventListener('pointermove',e=>{if(!sdrag)return;const dx=e.clientX-sdrag.sx,dy=e.clientY-sdrag.sy;if(!sdrag.moved&&Math.hypot(dx,dy)<6)return;
+  if(!sdrag.moved){sdrag.moved=true;sdrag.el.classList.add('rg')}
+  sdrag.px=e.clientX;sdrag.py=e.clientY;sdrag.el.style.transform='translate('+dx+'px,'+dy+'px)';
+  clearDz();const t=pjAt(e.clientX,e.clientY);if(t)t.classList.add('dzt');
+  if(!sdrag.raf)sdrag.raf=requestAnimationFrame(()=>{if(sdrag){sdrag.raf=0;drawArrows()}})});
+const endS=()=>{if(!sdrag)return;const r=sdrag;sdrag=null;clearDz();if(!r.moved)return;
+  const sub=BD.subs.find(x=>x.id===r.id);if(!sub){render();return}
+  const wp=pjAt(r.px,r.py)||r.el.closest('.wp'),npid=wp.dataset.pid;
+  const lr=r.el.getBoundingClientRect(),cy=lr.top+lr.height/2,sibs=[...wp.querySelectorAll('.sb')].filter(x=>x!==r.el);
+  const idx=sibs.filter(x=>{const b=x.getBoundingClientRect();return b.top+b.height/2<cy}).length;
+  const tgt=BD.subs.filter(x=>x!==sub&&x.pid===npid);
+  BD.subs=BD.subs.filter(x=>x!==sub);
+  if(sub.pid!==npid){BD.ideas.forEach(i=>{if(i.sid===sub.id)i.pid=npid});sub.pid=npid}
+  if(idx<tgt.length)BD.subs.splice(BD.subs.indexOf(tgt[idx]),0,sub);
+  else if(tgt.length)BD.subs.splice(BD.subs.indexOf(tgt[tgt.length-1])+1,0,sub);
+  else BD.subs.unshift(sub);
+  saveB()};
+document.addEventListener('pointerup',endS);document.addEventListener('pointercancel',endS);
+let rzt=0;window.addEventListener('resize',()=>{if(tab==='bd'&&!rzt)rzt=requestAnimationFrame(()=>{rzt=0;afterBoard()})});
+document.addEventListener('fullscreenchange',()=>{if(tab==='bd')setTimeout(afterBoard,100)});
 (()=>{let d=null;document.addEventListener('mousedown',e=>{const el=e.target.closest('.bs');if(!el||e.target.closest('.wp,.hit'))return;d={x:e.clientX,y:e.clientY,l:el.scrollLeft,t:el.scrollTop,el}});
 window.addEventListener('mousemove',e=>{if(d){d.el.scrollLeft=d.l-(e.clientX-d.x);d.el.scrollTop=d.t-(e.clientY-d.y)}});window.addEventListener('mouseup',()=>{d=null})})();
 function doneView(T){
@@ -409,7 +445,7 @@ function timeline(open){
   return h;
 }
 function render(){
-  filters();hello();
+  filters();hello();document.body.classList.toggle('bdfull',tab==='bd');
   const T=tasks.filter(t=>!hidden.has(t.cat));
   const open=T.filter(t=>!t.done).sort((a,b)=>tdate(a).localeCompare(tdate(b)));
   const act=open.filter(active);
@@ -498,7 +534,7 @@ function add(){const raw=$('#in').value.trim();if(!raw)return;const rv=$('#fr').
     if(newG){gname=$('#ng').value.trim();if(!gname){fgrp='new';renderGroups();$('#ng').placeholder='Scrivi il nome del gruppo';$('#ng').focus();return}}
     if(fsub==='new'){sname=$('#ns').value.trim();if(!sname){$('#ns').placeholder='Scrivi il nome del sottoprogetto';$('#ns').focus();return}}
     if(newG){pid=nid();BD.projects.push({id:pid,name:gname,color:ncol})}
-    let sid=fsub;if(fsub==='new'){sid=nid();BD.subs.push({id:sid,pid,name:sname})}else if(sid&&!BD.subs.some(x=>x.id===sid&&x.pid===pid))sid=null;
+    let sid=fsub;if(fsub==='new'){sid=nid();BD.subs.unshift({id:sid,pid,name:sname})}else if(sid&&!BD.subs.some(x=>x.id===sid&&x.pid===pid))sid=null;
     if(editing)Object.assign(editing,{text:raw,due,time,pid,sid:sid||null});
     else{const p=parse(raw);BD.ideas.push({id:nid(),pid,sid:sid||null,text:p.title,due,time,done:false})}
     closeM();saveB();return}
@@ -541,9 +577,10 @@ document.addEventListener('click',e=>{
   const a0=b.dataset.act,id0=b.dataset.id,ib=BD.ideas.find(x=>x.id===id0),pb=BD.projects.find(x=>x.id===id0);
   if(a0==='idone'){if(rsup)return;if(ib){ib.done=b.tagName==='INPUT'?b.checked:!ib.done;saveB()}return}
   if(a0==='iedit'){if(ib)openM(ib);return}
+  if(a0==='fs'){if(document.fullscreenElement)document.exitFullscreen();else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen();return}
   if(a0==='linkmode'){linkMode=!linkMode;linkSrc=null;render();return}
   if(a0==='pcol'){pcol=pcol===id0?null:id0;render();return}
-  if(a0==='sadd'){const n=prompt('Nome del sottoprogetto');if(n&&n.trim()){BD.subs.push({id:nid(),pid:id0,name:n.trim()});saveB()}return}
+  if(a0==='sadd'){const n=prompt('Nome del sottoprogetto');if(n&&n.trim()){BD.subs.unshift({id:nid(),pid:id0,name:n.trim()});saveB()}return}
   const sbb=BD.subs.find(x=>x.id===id0);
   if(a0==='siadd'){if(sbb)openM(null,{mode:'idea',pid:sbb.pid,sid:sbb.id});return}
   if(a0==='sren'){if(sbb){const n=prompt('Rinomina il sottoprogetto',sbb.name);if(n&&n.trim()){sbb.name=n.trim();saveB()}}return}
