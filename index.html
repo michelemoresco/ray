@@ -191,6 +191,12 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
  body.bdfull .bs{height:calc(100vh - 150px);min-height:360px}
  body.bdfull .wp{width:230px}
 }
+.zbar{position:sticky;bottom:8px;margin-left:auto;width:fit-content;display:flex;align-items:center;gap:4px;padding:3px 6px;border-radius:99px;background:rgba(25,27,26,.85);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(4px);z-index:8;margin-right:10px;margin-top:-36px}
+.zbar button{background:rgba(255,255,255,.08);color:#f4f3ee;border:1px solid rgba(255,255,255,.18);border-radius:99px;padding:2px 8px;font-size:12px;line-height:1.2}
+.zbar button.on{background:#f4f3ee;color:#191b1a;border-color:#f4f3ee;font-weight:600}
+.zbar span{font-size:11px;color:#f4f3ee;opacity:.8;min-width:36px;text-align:center;font-variant-numeric:tabular-nums}
+body.bdlock .wp button,body.bdlock .wk [data-act="linkmode"]{opacity:.35;pointer-events:none}
+body.bdlock .dh,body.bdlock .sn span,body.bdlock .wi .ck,body.bdlock .wi .tx{cursor:grab}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4efe3"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Timeline">
 </head>
@@ -235,7 +241,8 @@ const CATS={lavoro:'🎓 University',famiglia:'👨‍👩‍👧 Family',scaden
 const ALIAS={lavoro:'lavoro',work:'lavoro',university:'lavoro',famiglia:'famiglia',family:'famiglia',scadenze:'scadenze',deadlines:'scadenze',deadline:'scadenze',altro:'altro',others:'altro',other:'altro'};
 const REM={scadenze:[7,1,0],lavoro:[1],famiglia:[1],altro:[1]};
 const RX_SC=/\b(tari|tasi|imu|tasse?|irpef|iva|bollo|f24|730|unico|isee|rca|assicurazione|canone|mav|pagopa|rinnovo|scadenza|inps|inail|multa|revisione|commercialista|acconto|saldo)\b/i;
-const RX_FA=/\b(figli[ae]|figlie|spesa|pediatra|scuola|dentista|cena|compleanno|nonn[oi]|saggio|festa|palestra|sport|catechismo|colloqui|genitori)\b/i;
+const RX_FA=/\b(figli[ae]|figlie|spesa|pediatra|scuola|dentista|cena|compleanno|nonn[oi]|saggio|festa|palestra|sport|catechismo|colloqui|genitori|cate|caterina|lucia|luci|agne|agnese|giulia|giuli)\b/i;
+const RX_UN=/\b(telecon|meeting|et|wst|euclid|lisa|lezioni|swg|div2|riunione|gwac|tada|elementi\s+di\s+informatica|astronomia|virgo|lvk|call|cb|cds|consiglio)\b/i;
 const PRE='(?:\\b(?:entro(?:\\s+il)?|per(?:\\s+il)?|il)\\s+)?';
 
 function nextYearless(d,m){let y=new Date().getFullYear();let s=y+'-'+pad(m)+'-'+pad(d);if(s<today())s=(y+1)+'-'+pad(m)+'-'+pad(d);return s}
@@ -264,7 +271,7 @@ function parse(raw){
   let title=t.replace(/\s+/g,' ').trim().replace(/[,\-–:;]+$/,'').trim();
   if(!title)title=raw.trim();
   title=title.charAt(0).toUpperCase()+title.slice(1);
-  if(!cat)cat=RX_SC.test(raw)?'scadenze':RX_FA.test(raw)?'famiglia':'altro';
+  if(!cat)cat=RX_SC.test(raw)?'scadenze':RX_FA.test(raw)?'famiglia':RX_UN.test(raw)?'lavoro':'altro';
   return{title,due,time,cat,rec,rem:due?REM[cat]:[]};
 }
 const fmtDate=s=>{const d=fromYmd(s);return WDS[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()].slice(0,3)+(d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'')};
@@ -294,7 +301,7 @@ function hello(){const n=new Date(),dn=['Domenica','Lunedì','Martedì','Mercole
   $('#hello').textContent=dn+' '+n.getDate()+' '+MON[n.getMonth()]+' · '+(td?td+(td===1?' cosa per oggi':' cose per oggi'):'niente in scadenza oggi')+(ov?' · '+ov+' in ritardo':'')}
 function ideaItem(i){const p=BD.projects.find(x=>x.id===i.pid)||{name:'',color:'#d9c34a'},sb=i.sid?BD.subs.find(x=>x.id===i.sid):null;
   return `<div class="t ${i.done?'done':''}" style="--cl:${p.color}"><input type="checkbox" data-act="idone" data-id="${i.id}" ${i.done?'checked':''} aria-label="Done"><div class="b" data-act="iedit" data-id="${i.id}"><div class="ti">${esc(i.text)}</div><div class="m"><span class="tag">💡 ${esc(p.name)}${sb?' › '+esc(sb.name):''}</span>${fmtDate(i.due)}${i.time?' · '+i.time:''} · ${rel(i.due)}</div></div></div>`}
-let linkMode=false,linkSrc=null;
+let linkMode=false,linkSrc=null,zm=1,bdLock=false;
 const hh=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
 const rot=(id,k)=>(((hh(id)%200)/100)-1)*k;
 function unlink(keys){BD.links=BD.links.filter(l=>!keys.includes(l.a)&&!keys.includes(l.b))}
@@ -306,14 +313,15 @@ function ideaLi(i){return `<li class="wi${i.done?' dn2':''}" style="margin-left:
 function boardView(){
   if(!BD.projects.length)return '<div class="bw"><div class="bs"><div class="bde">La lavagna è vuota.<br>Tocca + e scegli “Idea” per iniziare il primo progetto.</div></div><div class="tray"></div></div>';
   autoPlace();
-  const tools=`<div class="wk"><button data-act="linkmode" class="${linkMode?'on':''}">🔗 Collega</button><button data-act="fs" class="fsb" title="Schermo intero">⛶</button><span class="note">${linkMode?(linkSrc?'Ora tocca l’elemento di arrivo':'Tocca l’elemento di partenza'):'Trascina titoli, sottoprogetti e pallini ○ per spostarli · tocca una freccia per eliminarla'}</span></div>`;
+  const tools=`<div class="wk"><button data-act="linkmode" class="${linkMode?'on':''}">🔗 Collega</button><button data-act="bdlock" class="${bdLock?'on':''}" title="Blocca modifiche e consenti solo pan">${bdLock?'🔒 Bloccata':'🔓 Lock'}</button><button data-act="fs" class="fsb" title="Schermo intero">⛶</button><span class="note">${bdLock?'Modalità sola navigazione (pan libero, modifiche bloccate)':(linkMode?(linkSrc?'Ora tocca l’elemento di arrivo':'Tocca l’elemento di partenza'):'Trascina titoli, sottoprogetti e pallini ○ per spostarli · tocca una freccia per eliminarla')}</span></div>`;
   const ps=BD.projects.map(p=>{
     const subs=BD.subs.filter(s=>s.pid===p.id),ids=new Set(subs.map(s=>s.id)),mine=BD.ideas.filter(i=>i.pid===p.id),
       root=mine.filter(i=>!(i.sid&&ids.has(i.sid))),
       sw=pcol===p.id?`<div class="sw">${CHALK.map(c=>`<i style="--c:${c}" data-pc="${c}" data-pid="${p.id}" class="${c===p.color?'on':''}"></i>`).join('')}</div>`:'';
     const sbs=subs.map(sb=>`<div class="sb dz" data-pid="${p.id}" data-sid="${sb.id}"><div class="sn"><span data-node="s:${sb.id}" class="${linkSrc==='s:'+sb.id?'sel':''}">${esc(sb.name)}</span></div>${ul(p.color,sb.id).replace('class="ul"','class="ul sm"')}<ul class="wl">${mine.filter(i=>i.sid===sb.id).map(ideaLi).join('')}</ul><div class="sa"><button data-act="siadd" data-id="${sb.id}">+ add</button><button data-act="sren" data-id="${sb.id}" title="Rinomina">✎</button><button data-act="sdel" data-id="${sb.id}" title="Elimina">✕</button></div></div>`).join('');
-    return `<div class="wp" data-pid="${p.id}" style="--ch:${p.color};left:${p.x}px;top:${p.y}px;transform:rotate(${rot(p.id,1.4).toFixed(2)}deg)"><div class="wt"><span class="dh${linkSrc==='p:'+p.id?' sel':''}" data-node="p:${p.id}">${esc(p.name)}</span></div>${ul(p.color,p.id)}${sw}${sbs}<div class="rb dz" data-pid="${p.id}" data-sid=""><ul class="wl">${root.map(ideaLi).join('')}</ul></div><div class="wa"><button data-act="padd" data-id="${p.id}">+ add</button><button data-act="sadd" data-id="${p.id}">+ sub</button><button data-act="pcol" data-id="${p.id}" title="Colore">🎨</button><button data-act="pren" data-id="${p.id}" title="Rinomina">✎</button><button data-act="pdel" data-id="${p.id}" title="Elimina">✕</button></div></div>`}).join('');
-  return tools+`<div class="bw"><div class="bs"><div class="cv"><svg class="ar" id="ar"></svg>${ps}</div></div><div class="tray"><i style="left:18px;width:26px;transform:rotate(-4deg)"></i><i style="left:52px;width:18px;background:#f4d35e;transform:rotate(3deg)"></i><b></b></div></div>`;
+    return `<div class="wp" data-pid="${p.id}" style="--ch:${p.color};left:${p.x}px;top:${p.y}px;transform:rotate(${rot(p.id,1.4).toFixed(2)}deg)"><div class="wt"><span class="dh${linkSrc==='p:'+p.id?' sel':''}" data-node="p:${p.id}">${esc(p.name)}</span></div>${ul(p.color,p.id)}${sw}<div class="rb dz" data-pid="${p.id}" data-sid=""><ul class="wl">${root.map(ideaLi).join('')}</ul></div>${sbs}<div class="wa"><button data-act="padd" data-id="${p.id}">+ add</button><button data-act="sadd" data-id="${p.id}">+ sub</button><button data-act="pcol" data-id="${p.id}" title="Colore">🎨</button><button data-act="pren" data-id="${p.id}" title="Rinomina">✎</button><button data-act="pdel" data-id="${p.id}" title="Elimina">✕</button></div></div>`}).join('');
+  const zbar=`<div class="zbar"><button type="button" data-act="zout" title="Riduci zoom">−</button><span>${Math.round(zm*100)}%</span><button type="button" data-act="zin" title="Aumenta zoom">+</button><button type="button" data-act="bdlock" class="${bdLock?'on':''}" title="Solo pan (blocca modifiche)">${bdLock?'🔒':'🔓'}</button></div>`;
+  return tools+`<div class="bw"><div class="bs"><div class="cv" style="transform:scale(${zm});transform-origin:0 0"><svg class="ar" id="ar"></svg>${ps}</div>${zbar}</div><div class="tray"><i style="left:18px;width:26px;transform:rotate(-4deg)"></i><i style="left:52px;width:18px;background:#f4d35e;transform:rotate(3deg)"></i><b></b></div></div>`;
 }
 function trect(el){try{const r=document.createRange();r.selectNodeContents(el);const b=r.getBoundingClientRect();if(b&&b.width)return b}catch(e){}return el.getBoundingClientRect()}
 function nodeRect(el,cr){const a=trect(el);let l=a.left,t=a.top,r=a.right,b=a.bottom;
@@ -355,27 +363,28 @@ function drawArrows(){
   svg.innerHTML=out;
 }
 function afterBoard(){const cv=$('.cv');if(!cv)return;let mx=0,my=0;const cr=cv.getBoundingClientRect(),par=cv.parentElement;
-  cv.querySelectorAll('.wp').forEach(p=>{const r=p.getBoundingClientRect();mx=Math.max(mx,r.right-cr.left);my=Math.max(my,r.bottom-cr.top)});
-  const w=Math.max(mx+500,par.clientWidth)+'px',h=Math.max(my+400,par.clientHeight)+'px';cv.style.width=w;cv.style.height=h;
-  const svg=$('#ar');svg.setAttribute('width',w);svg.setAttribute('height',h);drawArrows();
+  cv.querySelectorAll('.wp').forEach(p=>{const r=p.getBoundingClientRect();mx=Math.max(mx,(r.right-cr.left)/zm);my=Math.max(my,(r.bottom-cr.top)/zm)});
+  const baseW=Math.max(mx+500,par.clientWidth/zm),baseH=Math.max(my+400,par.clientHeight/zm);
+  cv.style.width=baseW+'px';cv.style.height=baseH+'px';
+  const svg=$('#ar');svg.setAttribute('width',baseW+'px');svg.setAttribute('height',baseH+'px');drawArrows();
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawArrows)}
 let drag=null;
-document.addEventListener('pointerdown',e=>{const h=e.target.closest('.dh');if(!h||linkMode)return;const pj=h.closest('.wp'),p=BD.projects.find(x=>x.id===pj.dataset.pid);if(!p)return;
+document.addEventListener('pointerdown',e=>{if(bdLock)return;const h=e.target.closest('.dh');if(!h||linkMode)return;const pj=h.closest('.wp'),p=BD.projects.find(x=>x.id===pj.dataset.pid);if(!p)return;
   drag={p,pj,sx:e.clientX,sy:e.clientY,ox:p.x,oy:p.y,moved:false,raf:0};try{h.setPointerCapture(e.pointerId)}catch(x){}});
 document.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;if(!drag.moved&&Math.hypot(dx,dy)<5)return;
   if(!drag.moved){drag.moved=true;drag.pj.classList.add('dg')}
-  drag.p.x=Math.max(0,Math.round(drag.ox+dx));drag.p.y=Math.max(0,Math.round(drag.oy+dy));drag.pj.style.left=drag.p.x+'px';drag.pj.style.top=drag.p.y+'px';
+  drag.p.x=Math.max(0,Math.round(drag.ox+dx/zm));drag.p.y=Math.max(0,Math.round(drag.oy+dy/zm));drag.pj.style.left=drag.p.x+'px';drag.pj.style.top=drag.p.y+'px';
   if(!drag.raf)drag.raf=requestAnimationFrame(()=>{if(drag){drag.raf=0;drawArrows()}})});
 const endDrag=()=>{if(drag){const m=drag.moved;drag=null;if(m)saveB()}};
 document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
 let rdrag=null,rsup=false;
 const dzAt=(x,y)=>[...document.querySelectorAll('.dz')].find(z=>{const b=z.getBoundingClientRect();return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom});
 const clearDz=()=>document.querySelectorAll('.dzt').forEach(z=>z.classList.remove('dzt'));
-document.addEventListener('pointerdown',e=>{const c=e.target.closest('.ck');if(!c||linkMode||drag)return;const li=c.closest('.wi');
+document.addEventListener('pointerdown',e=>{if(bdLock)return;const c=e.target.closest('.ck');if(!c||linkMode||drag)return;const li=c.closest('.wi');
   rdrag={id:c.dataset.id,li,sx:e.clientX,sy:e.clientY,px:e.clientX,py:e.clientY,moved:false,rot:li.style.transform,raf:0};try{c.setPointerCapture(e.pointerId)}catch(x){}});
 document.addEventListener('pointermove',e=>{if(!rdrag)return;const dx=e.clientX-rdrag.sx,dy=e.clientY-rdrag.sy;if(!rdrag.moved&&Math.hypot(dx,dy)<6)return;
   if(!rdrag.moved){rdrag.moved=true;rdrag.li.classList.add('rg')}
-  rdrag.px=e.clientX;rdrag.py=e.clientY;rdrag.li.style.transform='translate('+dx+'px,'+dy+'px) '+rdrag.rot;
+  rdrag.px=e.clientX;rdrag.py=e.clientY;rdrag.li.style.transform='translate('+(dx/zm)+'px,'+(dy/zm)+'px) '+rdrag.rot;
   clearDz();const t=dzAt(e.clientX,e.clientY);if(t)t.classList.add('dzt');
   if(!rdrag.raf)rdrag.raf=requestAnimationFrame(()=>{if(rdrag){rdrag.raf=0;drawArrows()}})});
 const endR=()=>{if(!rdrag)return;const r=rdrag;rdrag=null;clearDz();if(!r.moved)return;
@@ -394,11 +403,11 @@ const endR=()=>{if(!rdrag)return;const r=rdrag;rdrag=null;clearDz();if(!r.moved)
 document.addEventListener('pointerup',endR);document.addEventListener('pointercancel',endR);
 const pjAt=(x,y)=>[...document.querySelectorAll('.wp')].find(z=>{const b=z.getBoundingClientRect();return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom});
 let sdrag=null;
-document.addEventListener('pointerdown',e=>{const h=e.target.closest('.sn span');if(!h||linkMode||drag||rdrag)return;const el=h.closest('.sb');
+document.addEventListener('pointerdown',e=>{if(bdLock)return;const h=e.target.closest('.sn span');if(!h||linkMode||drag||rdrag)return;const el=h.closest('.sb');
   sdrag={id:el.dataset.sid,el,sx:e.clientX,sy:e.clientY,px:e.clientX,py:e.clientY,moved:false,raf:0};try{h.setPointerCapture(e.pointerId)}catch(x){}});
 document.addEventListener('pointermove',e=>{if(!sdrag)return;const dx=e.clientX-sdrag.sx,dy=e.clientY-sdrag.sy;if(!sdrag.moved&&Math.hypot(dx,dy)<6)return;
   if(!sdrag.moved){sdrag.moved=true;sdrag.el.classList.add('rg')}
-  sdrag.px=e.clientX;sdrag.py=e.clientY;sdrag.el.style.transform='translate('+dx+'px,'+dy+'px)';
+  sdrag.px=e.clientX;sdrag.py=e.clientY;sdrag.el.style.transform='translate('+(dx/zm)+'px,'+(dy/zm)+'px)';
   clearDz();const t=pjAt(e.clientX,e.clientY);if(t)t.classList.add('dzt');
   if(!sdrag.raf)sdrag.raf=requestAnimationFrame(()=>{if(sdrag){sdrag.raf=0;drawArrows()}})});
 const endS=()=>{if(!sdrag)return;const r=sdrag;sdrag=null;clearDz();if(!r.moved)return;
@@ -445,7 +454,7 @@ function timeline(open){
   return h;
 }
 function render(){
-  filters();hello();document.body.classList.toggle('bdfull',tab==='bd');
+  filters();hello();document.body.classList.toggle('bdfull',tab==='bd');document.body.classList.toggle('bdlock',tab==='bd'&&bdLock);
   const T=tasks.filter(t=>!hidden.has(t.cat));
   const open=T.filter(t=>!t.done).sort((a,b)=>tdate(a).localeCompare(tdate(b)));
   const act=open.filter(active);
@@ -534,7 +543,7 @@ function add(){const raw=$('#in').value.trim();if(!raw)return;const rv=$('#fr').
     if(newG){gname=$('#ng').value.trim();if(!gname){fgrp='new';renderGroups();$('#ng').placeholder='Scrivi il nome del gruppo';$('#ng').focus();return}}
     if(fsub==='new'){sname=$('#ns').value.trim();if(!sname){$('#ns').placeholder='Scrivi il nome del sottoprogetto';$('#ns').focus();return}}
     if(newG){pid=nid();BD.projects.push({id:pid,name:gname,color:ncol})}
-    let sid=fsub;if(fsub==='new'){sid=nid();BD.subs.unshift({id:sid,pid,name:sname})}else if(sid&&!BD.subs.some(x=>x.id===sid&&x.pid===pid))sid=null;
+    let sid=fsub;if(fsub==='new'){sid=nid();BD.subs.push({id:sid,pid,name:sname})}else if(sid&&!BD.subs.some(x=>x.id===sid&&x.pid===pid))sid=null;
     if(editing)Object.assign(editing,{text:raw,due,time,pid,sid:sid||null});
     else{const p=parse(raw);BD.ideas.push({id:nid(),pid,sid:sid||null,text:p.title,due,time,done:false})}
     closeM();saveB();return}
@@ -542,7 +551,7 @@ function add(){const raw=$('#in').value.trim();if(!raw)return;const rv=$('#fr').
   if(editing)Object.assign(editing,{title:raw,due,time,cat:fcat,rec,rem:due?REM[fcat]:[]});
   else{const p=parse(raw);tasks.push({id:nid(),title:p.title,due,time,cat:fcat,rec,rem:due?REM[fcat]:[],done:false})}
   closeM();save();}
-$('#fab').onclick=()=>openM(null,{mode:tab==='bd'?'idea':'todo'});
+$('#fab').onclick=()=>{if(tab==='bd'&&bdLock)return;openM(null,{mode:tab==='bd'?'idea':'todo'})};
 $('#delb').onclick=()=>{if(!editing||!confirm('Eliminare?'))return;
   if(mode==='idea'){unlink(['i:'+editing.id]);BD.ideas=BD.ideas.filter(x=>x!==editing);closeM();saveB()}else{tasks=tasks.filter(x=>x!==editing);closeM();save()}};
 $('#mx').onclick=closeM;$('#addb').onclick=add;
@@ -569,11 +578,19 @@ document.addEventListener('click',e=>{
 document.addEventListener('click',e=>{
   const tb=e.target.closest('[data-tab]');if(tb){tab=(tb.dataset.tab==='done'&&tab==='done')?'list':tb.dataset.tab;render();return}
   const pc=e.target.closest('[data-pc]');if(pc){const p=BD.projects.find(x=>x.id===pc.dataset.pid);if(p){p.color=pc.dataset.pc;pcol=null;saveB()}return}
+  const actBtn=e.target.closest('[data-act]');
+  if(actBtn&&(actBtn.dataset.act==='bdlock'||actBtn.dataset.act==='zin'||actBtn.dataset.act==='zout')){
+    const aa=actBtn.dataset.act;
+    if(aa==='bdlock'){bdLock=!bdLock;if(bdLock)linkMode=false;linkSrc=null;render()}
+    else if(aa==='zin'){zm=Math.min(1.6,+(zm+0.1).toFixed(2));render()}
+    else if(aa==='zout'){zm=Math.max(0.6,+(zm-0.1).toFixed(2));render()}
+    return}
+  if(tab==='bd'&&bdLock)return;
   const wi=linkMode?e.target.closest('.wi'):null,nd=e.target.closest('[data-node]')||(wi?wi.querySelector('[data-node]'):null);
   if(linkMode&&nd){const k=nd.dataset.node;if(!linkSrc){linkSrc=k;render();return}if(linkSrc===k){linkSrc=null;render();return}
     if(!BD.links.some(l=>(l.a===linkSrc&&l.b===k)||(l.a===k&&l.b===linkSrc)))BD.links.push({id:nid(),a:linkSrc,b:k});linkMode=false;linkSrc=null;saveB();return}
   const lk=e.target.closest('[data-link]');if(lk){if(confirm('Eliminare questa freccia?')){BD.links=BD.links.filter(l=>l.id!==lk.dataset.link);saveB()}return}
-  const b=e.target.closest('[data-act]');if(!b)return;
+  const b=actBtn;if(!b)return;
   const a0=b.dataset.act,id0=b.dataset.id,ib=BD.ideas.find(x=>x.id===id0),pb=BD.projects.find(x=>x.id===id0);
   if(a0==='idone'){if(rsup)return;if(ib){ib.done=b.tagName==='INPUT'?b.checked:!ib.done;saveB()}return}
   if(a0==='iedit'){if(ib)openM(ib);return}
