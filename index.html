@@ -583,7 +583,7 @@ document.addEventListener('click',e=>{
     const aa=actBtn.dataset.act;
     if(aa==='bdlock'){bdLock=!bdLock;if(bdLock)linkMode=false;linkSrc=null;render()}
     else if(aa==='zin'){zm=Math.min(1.6,+(zm+0.1).toFixed(2));render()}
-    else if(aa==='zout'){zm=Math.max(0.6,+(zm-0.1).toFixed(2));render()}
+    else if(aa==='zout'){zm=Math.max(0.2,+(zm-0.1).toFixed(2));render()}
     return}
   if(tab==='bd'&&bdLock)return;
   const wi=linkMode?e.target.closest('.wi'):null,nd=e.target.closest('[data-node]')||(wi?wi.querySelector('[data-node]'):null);
