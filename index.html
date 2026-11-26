@@ -313,7 +313,7 @@ function ideaLi(i){return `<li class="wi${i.done?' dn2':''}" style="margin-left:
 function boardView(){
   if(!BD.projects.length)return '<div class="bw"><div class="bs"><div class="bde">La lavagna è vuota.<br>Tocca + e scegli “Idea” per iniziare il primo progetto.</div></div><div class="tray"></div></div>';
   autoPlace();
-  const tools=`<div class="wk"><button data-act="linkmode" class="${linkMode?'on':''}">🔗 Collega</button><button data-act="bdlock" class="${bdLock?'on':''}" title="Blocca modifiche e consenti solo pan">${bdLock?'🔒 Bloccata':'🔓 Lock'}</button><button data-act="fs" class="fsb" title="Schermo intero">⛶</button><span class="note">${bdLock?'Modalità sola navigazione (pan libero, modifiche bloccate)':(linkMode?(linkSrc?'Ora tocca l’elemento di arrivo':'Tocca l’elemento di partenza'):'Trascina titoli, sottoprogetti e pallini ○ per spostarli · tocca una freccia per eliminarla')}</span></div>`;
+  const tools=`<div class="wk"><button data-act="linkmode" class="${linkMode?'on':''}">🔗 Link</button><button data-act="bdlock" class="${bdLock?'on':''}" title="Blocca modifiche e consenti solo pan">${bdLock?'🔒 Locked':'🔓 Lock'}</button><button data-act="fs" class="fsb" title="Schermo intero">⛶</button><span class="note">${bdLock?'Modalità sola navigazione (pan libero, modifiche bloccate)':(linkMode?(linkSrc?'Ora tocca l’elemento di arrivo':'Tocca l’elemento di partenza'):'Trascina titoli, sottoprogetti e pallini ○ per spostarli · tocca una freccia per eliminarla')}</span></div>`;
   const ps=BD.projects.map(p=>{
     const subs=BD.subs.filter(s=>s.pid===p.id),ids=new Set(subs.map(s=>s.id)),mine=BD.ideas.filter(i=>i.pid===p.id),
       root=mine.filter(i=>!(i.sid&&ids.has(i.sid))),
