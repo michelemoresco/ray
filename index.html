@@ -67,7 +67,7 @@ h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)
 .cats{display:flex;flex-wrap:wrap;gap:6px}
 .cc{border-color:color-mix(in srgb,var(--cl) 50%,var(--bd))}.cc.on{background:color-mix(in srgb,var(--cl) 28%,var(--card));border-color:var(--cl);font-weight:600}
 
-:root{--bg:#f4efe3;--card:#fffdf7;--tx:#2a2623;--mut:#7a7165;--bd:#e2d9c4}
+:root{--bg:#f3f3f2;--card:#fffdf7;--tx:#2a2623;--mut:#7a7165;--bd:#e2d9c4}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1a17;--card:#26231f;--tx:#f0ebe0;--mut:#a39a8b;--bd:#3a352d}}
 :root[data-theme="dark"]{--bg:#1c1a17;--card:#26231f;--tx:#f0ebe0;--mut:#a39a8b;--bd:#3a352d}
 body{background-image:radial-gradient(color-mix(in srgb,var(--tx) 7%,transparent) 1px,transparent 1px);background-size:18px 18px}
@@ -257,8 +257,9 @@ body.nbfull .hd,body.nbfull .tabs,body.nbfull .filters,body.nbfull main>.note,bo
 #xmodal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;justify-content:center;z-index:60}
 #xmodal[hidden]{display:none}
 #xgo{width:100%;padding:16px;font-size:18px;border-radius:14px}
+body.nbfull{background-image:none}
 </style>
-<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4efe3"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Timeline">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f3f3f2"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Timeline">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="chalk" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.8" xChannelSelector="R" yChannelSelector="G" result="d"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -2.4 1.85" result="sp"/><feComposite in="d" in2="sp" operator="in"/></filter><filter id="pencil" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="4" xChannelSelector="R" yChannelSelector="G" result="d"/><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="2" result="g"/><feColorMatrix in="g" type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 -3 2.2" result="m"/><feComposite in="d" in2="m" operator="in"/></filter></defs></svg>
