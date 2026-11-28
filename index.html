@@ -219,7 +219,7 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 .pg .empty{font:19px/28px "RayHand","Kalam",cursive;color:var(--mut);padding:28px 0;text-align:left}
 .pg .note{font-size:12px;line-height:28px;margin:0!important}
 .pg button{font-family:inherit}
-.pg .now{position:relative;border:none;background:none;border-radius:0;padding:0;margin:28px 6px 28px}
+.pg .now{position:relative;border:none;background:none;border-radius:0;padding:0;margin:0 6px 28px}
 .pg .now::before,.pg .now::after{content:"";position:absolute;pointer-events:none;border:2px solid #c0392b;filter:url(#pencil)}
 .pg .now::before{inset:-8px -10px -6px -10px;opacity:.9;border-radius:255px 14px 225px 14px/14px 225px 14px 255px}
 .pg .now::after{inset:-5px -6px -9px -13px;border-width:1.4px;opacity:.55;transform:rotate(-.5deg);border-radius:14px 255px 14px 225px/225px 14px 255px 14px}
@@ -235,7 +235,7 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 .ne .na{flex:none}.ne .na button{font-size:11px;line-height:20px;padding:0 6px;margin-left:2px;border:none;background:transparent;color:var(--mut);text-decoration:underline}
 .ne .nb{font:17px/28px "RayHand","Kalam",cursive;white-space:pre-wrap;word-break:break-word;color:var(--tx);display:-webkit-box;-webkit-line-clamp:8;-webkit-box-orient:vertical;overflow:hidden}
 /* ===== allineamento testo / righe ===== */
-.pg{--ln:19px;font-size:17px;
+.pg{--ln:var(--lnx,19px);font-size:17px;
  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent var(--ln),rgba(80,95,125,.28) var(--ln),rgba(80,95,125,.28) calc(var(--ln) + 1px),transparent calc(var(--ln) + 1px),transparent 28px);
  background-position:0 0;padding:28px 16px 28px 18px;border-radius:0}
 .pg .t .b{font-size:17px;line-height:28px}
@@ -243,9 +243,9 @@ h3{font:italic 400 16px Georgia,serif;text-transform:none;letter-spacing:0;color
 .pg .t .m{line-height:0}
 .pg .tag{display:inline;padding:0 3px}
 .pg .t input[type=checkbox]{margin-top:3px}
-.pg h3{position:relative;top:-1.32px}
-.pg .empty{position:relative;top:-0.53px}
-.ne .nd{position:relative;top:1.32px}
+.pg h3{position:relative;top:var(--d22,-1.32px)}
+.pg .empty{position:relative;top:var(--d19,-0.53px)}
+.ne .nd{position:relative;top:var(--d12,1.32px)}
 .ne .na{align-self:center}
 .nbk{margin:0 0 20px}
 body.nbfull main{max-width:none;padding:16px 0 96px}
@@ -258,6 +258,7 @@ body.nbfull .hd,body.nbfull .tabs,body.nbfull .filters,body.nbfull main>.note,bo
 #xmodal[hidden]{display:none}
 #xgo{width:100%;padding:16px;font-size:18px;border-radius:14px}
 body.nbfull{background-image:none}
+.fsel select{font:inherit;font-size:12px;padding:3px 6px;border:1px dashed var(--bd);border-radius:8px;background:transparent;color:var(--mut)}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f3f3f2"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Timeline">
 </head>
@@ -270,7 +271,7 @@ body.nbfull{background-image:none}
 <div id="now"></div>
 <div id="view"></div>
 <div class="note">Usa #university, #family, #deadlines o #others per forzare la categoria.</div>
-<div class="foot"><button id="ics">⬇ Esporta .ics</button><button id="bk">⬇ Backup</button><button id="rs">⬆ Ripristina</button><input type="file" id="rf" accept=".json,application/json" hidden><span class="note" id="sync"></span></div>
+<div class="foot"><button id="ics">⬇ Esporta .ics</button><button id="bk">⬇ Backup</button><button id="rs">⬆ Ripristina</button><input type="file" id="rf" accept=".json,application/json" hidden><label class="note fsel">Carattere <select id="fsel"></select></label><span class="note" id="sync"></span></div>
 </main>
 <button id="fab" aria-label="Nuova attività">+</button>
 <div id="modal" hidden><div class="sheet">
@@ -809,6 +810,22 @@ $('#xgo').onclick=async()=>{const btn=$('#xgo');btn.disabled=true;btn.textConten
     $('#xmodal').hidden=true}
   catch(e){alert('Esportazione non riuscita: '+e.message)}
   finally{btn.disabled=false;btn.textContent='Scarica'}};
+const FONTS={courier:{n:'Courier Prime · macchina da scrivere pulita',f:'hand.woff2?v=6',k:88},
+  elite:{n:'Special Elite · macchina da scrivere consumata',f:'font-special-elite.woff2',k:90},
+  mansalva:{n:'Mansalva · penna decisa',f:'font-mansalva.woff2',k:92},
+  nothing:{n:'Nothing You Could Do · corsivo sottile',f:'font-nothing.woff2',k:108},
+  sunrise:{n:'Waiting for the Sunrise · penna nervosa',f:'font-sunrise.woff2',k:115},
+  patrick:{n:'Patrick Hand · stampatello a mano',f:'font-patrick.woff2',k:100}};
+function applyFont(key){const f=FONTS[key]||FONTS.courier;
+  let st=$('#hf');if(!st){st=document.createElement('style');st.id='hf';document.head.appendChild(st)}
+  st.textContent='@font-face{font-family:"RayHand";src:url('+f.f+') format("woff2");font-weight:400;font-style:normal;font-display:swap;size-adjust:'+f.k+'%;ascent-override:90%;descent-override:30%;line-gap-override:0%}';
+  const b=fs=>{const e=fs*f.k/100;return (28-1.2*e)/2+.9*e},b0=b(17),r=document.documentElement.style;
+  r.setProperty('--lnx',(Math.round(b0)+1)+'px');r.setProperty('--d22',(b0-b(22)).toFixed(2)+'px');r.setProperty('--d19',(b0-b(19)).toFixed(2)+'px');r.setProperty('--d12',(b0-b(12)).toFixed(2)+'px');
+  try{document.fonts.load('13px RayHand').then(()=>{if(tab==='bd')drawArrows()})}catch(e){}}
+let fkey='courier';try{const v=localStorage.getItem('ray_font');if(v&&FONTS[v])fkey=v}catch(e){}
+$('#fsel').innerHTML=Object.keys(FONTS).map(k=>'<option value="'+k+'"'+(k===fkey?' selected':'')+'>'+FONTS[k].n+'</option>').join('');
+$('#fsel').addEventListener('change',e=>{fkey=e.target.value;try{localStorage.setItem('ray_font',fkey)}catch(x){}applyFont(fkey)});
+applyFont(fkey);
 $('#bk').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({app:'timeline',v:1,exported:new Date().toISOString(),tasks,board:BD,boards:BS,notes:NOTES})],{type:'application/json'}));a.download='timeline-backup-'+today()+'.json';document.body.appendChild(a);a.click();a.remove();$('#sync').textContent='Backup scaricato'};
 $('#rs').onclick=()=>$('#rf').click();
 $('#rf').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if((d.app!=='timeline'&&d.app!=='ray')||!Array.isArray(d.tasks))throw 0;const b=d.board||{};
